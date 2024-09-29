@@ -9,20 +9,20 @@ importers:
   .:
     dependencies:
       '@nuxthub/core':
-        specifier: ^0.7.10
+        specifier: ^0.7.20
         version: 0.7.20(ioredis@5.4.1)(magicast@0.3.5)(rollup@4.22.5)(vite@5.4.8(@types/node@22.7.4)(terser@5.34.1))
       nuxt:
         specifier: ^3.13.2
         version: 3.13.2(@parcel/watcher@2.4.1)(@types/node@22.7.4)(ioredis@5.4.1)(magicast@0.3.5)(rollup@4.22.5)(terser@5.34.1)(vite@5.4.8(@types/node@22.7.4)(terser@5.34.1))
       vue:
-        specifier: latest
+        specifier: ^3.5.10
         version: 3.5.10
       vue-router:
-        specifier: latest
+        specifier: ^4.4.5
         version: 4.4.5(vue@3.5.10)
     devDependencies:
       wrangler:
-        specifier: ^3.75.0
+        specifier: ^3.78.12
         version: 3.78.12(@cloudflare/workers-types@4.20240925.0)
 
 packages:
