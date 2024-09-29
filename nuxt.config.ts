@@ -2,7 +2,7 @@
 export default defineNuxtConfig({
   compatibilityDate: '2024-04-03',
   devtools: { enabled: true },
-  modules: ['@nuxthub/core', '@nuxt/eslint'],
+  modules: ['@nuxthub/core', '@nuxt/eslint', '@nuxt/ui'],
   future: {
     compatibilityVersion: 4,
   },
