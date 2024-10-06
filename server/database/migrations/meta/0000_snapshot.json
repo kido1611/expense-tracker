@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "4c8fbcd7-171b-48f0-a010-d60e7872b64f",
+  "id": "57b1b087-a43b-4e6a-8293-dfdc4c493c38",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categories": {
@@ -31,7 +31,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -39,7 +39,7 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -107,7 +107,7 @@
         },
         "spend_at": {
           "name": "spend_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -115,7 +115,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -123,7 +123,7 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -210,7 +210,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -218,7 +218,7 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -235,6 +235,139 @@
         }
       },
       "foreignKeys": {},
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {}
+    },
+    "wallet_transfers": {
+      "name": "wallet_transfers",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "integer",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": true
+        },
+        "source_wallet_id": {
+          "name": "source_wallet_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "source_transaction_id": {
+          "name": "source_transaction_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_wallet_id": {
+          "name": "target_wallet_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "target_transaction_id": {
+          "name": "target_transaction_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "fee_transaction_id": {
+          "name": "fee_transaction_id",
+          "type": "integer",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(CURRENT_TIMESTAMP)"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "wallet_transfers_source_wallet_id_wallets_id_fk": {
+          "name": "wallet_transfers_source_wallet_id_wallets_id_fk",
+          "tableFrom": "wallet_transfers",
+          "tableTo": "wallets",
+          "columnsFrom": [
+            "source_wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wallet_transfers_source_transaction_id_transactions_id_fk": {
+          "name": "wallet_transfers_source_transaction_id_transactions_id_fk",
+          "tableFrom": "wallet_transfers",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "source_transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wallet_transfers_target_wallet_id_wallets_id_fk": {
+          "name": "wallet_transfers_target_wallet_id_wallets_id_fk",
+          "tableFrom": "wallet_transfers",
+          "tableTo": "wallets",
+          "columnsFrom": [
+            "target_wallet_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wallet_transfers_target_transaction_id_transactions_id_fk": {
+          "name": "wallet_transfers_target_transaction_id_transactions_id_fk",
+          "tableFrom": "wallet_transfers",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "target_transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        },
+        "wallet_transfers_fee_transaction_id_transactions_id_fk": {
+          "name": "wallet_transfers_fee_transaction_id_transactions_id_fk",
+          "tableFrom": "wallet_transfers",
+          "tableTo": "transactions",
+          "columnsFrom": [
+            "fee_transaction_id"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "no action"
+        }
+      },
       "compositePrimaryKeys": {},
       "uniqueConstraints": {}
     },
@@ -272,7 +405,7 @@
         },
         "created_at": {
           "name": "created_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,
@@ -280,7 +413,7 @@
         },
         "updated_at": {
           "name": "updated_at",
-          "type": "integer",
+          "type": "text",
           "primaryKey": false,
           "notNull": true,
           "autoincrement": false,

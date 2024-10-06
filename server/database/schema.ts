@@ -6,10 +6,10 @@ export const users = sqliteTable("users", {
   name: text("name").notNull(),
   email: text("email").notNull().unique(),
   password: text("password").notNull(),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: text("created_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: text("updated_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),
 });
@@ -21,10 +21,10 @@ export const wallets = sqliteTable(
     nanoid: text("nanoid").notNull().unique(),
     name: text("name").notNull(),
     balance: integer("balance").notNull().default(0),
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: text("updated_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
   },
@@ -40,10 +40,10 @@ export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
   name: text("name").notNull(),
   isExpense: integer("is_expense", { mode: "boolean" }).default(false),
-  createdAt: integer("created_at", { mode: "timestamp" })
+  createdAt: text("created_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: integer("updated_at", { mode: "timestamp" })
+  updatedAt: text("updated_at")
     .notNull()
     .default(sql`(CURRENT_TIMESTAMP)`),
 });
@@ -66,14 +66,14 @@ export const transactions = sqliteTable(
       mode: "boolean",
     }).default(true),
 
-    spendAt: integer("spend_at", { mode: "timestamp" })
+    spendAt: text("spend_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
 
-    createdAt: integer("created_at", { mode: "timestamp" })
+    createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: integer("updated_at", { mode: "timestamp" })
+    updatedAt: text("updated_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
   },
@@ -101,6 +101,12 @@ export const walletTransfers = sqliteTable("wallet_transfers", {
   feeTransactionId: integer("fee_transaction_id").references(
     () => transactions.id,
   ),
+  createdAt: text("created_at")
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(CURRENT_TIMESTAMP)`),
 });
 
 // TODO: table ledger
