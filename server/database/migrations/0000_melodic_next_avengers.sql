@@ -23,6 +23,7 @@ CREATE TABLE `transactions` (
 --> statement-breakpoint
 CREATE TABLE `users` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`uuid` text NOT NULL,
 	`name` text NOT NULL,
 	`email` text NOT NULL,
 	`password` text NOT NULL,
@@ -57,6 +58,7 @@ CREATE TABLE `wallets` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `transactions_nanoid_unique` ON `transactions` (`nanoid`);--> statement-breakpoint
 CREATE INDEX `transactions_nanoid_idx` ON `transactions` (`nanoid`);--> statement-breakpoint
+CREATE UNIQUE INDEX `users_uuid_unique` ON `users` (`uuid`);--> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `wallets_nanoid_unique` ON `wallets` (`nanoid`);--> statement-breakpoint
 CREATE INDEX `wallets_nanoid_idx` ON `wallets` (`nanoid`);--> statement-breakpoint
