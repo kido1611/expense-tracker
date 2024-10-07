@@ -15,4 +15,7 @@ export default defineNuxtConfig({
       maxAge: 60 * 60 * 24, // 2 Hours
     },
   },
+  colorMode: {
+    preference: "dark",
+  },
 });
