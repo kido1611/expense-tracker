@@ -28,8 +28,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   })
     .then(async () => {
       toast.add({
-        id: "login_message",
-        description: "Ok",
+        title: "Ok",
       });
 
       await refreshSession();
@@ -47,7 +46,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 </script>
 
 <template>
-  <div>
+  <UContainer>
     <h1>Login</h1>
     <UForm
       :schema="loginSchema"
@@ -79,5 +78,5 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         >Login</UButton
       >
     </UForm>
-  </div>
+  </UContainer>
 </template>
