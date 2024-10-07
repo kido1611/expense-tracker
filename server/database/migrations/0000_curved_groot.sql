@@ -1,13 +1,16 @@
 CREATE TABLE `categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`user_id` integer NOT NULL,
 	`name` text NOT NULL,
 	`is_expense` integer DEFAULT false,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE TABLE `transactions` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`user_id` integer NOT NULL,
 	`wallet_id` integer NOT NULL,
 	`category_id` integer NOT NULL,
 	`nanoid` text NOT NULL,
@@ -17,6 +20,7 @@ CREATE TABLE `transactions` (
 	`spend_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE no action,
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
 );
@@ -49,11 +53,13 @@ CREATE TABLE `wallet_transfers` (
 --> statement-breakpoint
 CREATE TABLE `wallets` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
+	`user_id` integer NOT NULL,
 	`nanoid` text NOT NULL,
 	`name` text NOT NULL,
 	`balance` integer DEFAULT 0 NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
+	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `transactions_nanoid_unique` ON `transactions` (`nanoid`);--> statement-breakpoint

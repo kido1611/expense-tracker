@@ -19,6 +19,9 @@ export const wallets = sqliteTable(
   "wallets",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
     nanoid: text("nanoid").notNull().unique(),
     name: text("name").notNull(),
     balance: integer("balance").notNull().default(0),
@@ -39,6 +42,9 @@ export const wallets = sqliteTable(
 
 export const categories = sqliteTable("categories", {
   id: integer("id").primaryKey({ autoIncrement: true }),
+  userId: integer("user_id")
+    .notNull()
+    .references(() => users.id),
   name: text("name").notNull(),
   isExpense: integer("is_expense", { mode: "boolean" }).default(false),
   createdAt: text("created_at")
@@ -53,6 +59,9 @@ export const transactions = sqliteTable(
   "transactions",
   {
     id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id")
+      .notNull()
+      .references(() => users.id),
     walletId: integer("wallet_id")
       .notNull()
       .references(() => wallets.id),
