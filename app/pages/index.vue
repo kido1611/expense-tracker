@@ -14,7 +14,7 @@ async function logout() {
 </script>
 
 <template>
-  <div>
+  <UContainer>
     <h1>Nuxt Routing set up successfully!</h1>
     <p>Current route: {{ route.path }}</p>
     <a href="https://nuxt.com/docs/getting-started/routing" target="_blank"
@@ -26,6 +26,10 @@ async function logout() {
       {{ user }}
     </p>
 
-    <UButton type="button" @click="logout">Logout</UButton>
-  </div>
+    <UButton type="button" icon="i-tabler-logout" @click="logout"
+      >Logout</UButton
+    >
+
+    <WalletForm />
+  </UContainer>
 </template>
