@@ -1,11 +1,12 @@
 CREATE TABLE `categories` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`user_id` integer NOT NULL,
+	`key` text,
 	`name` text NOT NULL,
 	`is_expense` integer DEFAULT false,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `transactions` (
@@ -20,9 +21,9 @@ CREATE TABLE `transactions` (
 	`spend_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE TABLE `users` (
@@ -44,11 +45,11 @@ CREATE TABLE `wallet_transfers` (
 	`fee_transaction_id` integer,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`source_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`source_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`target_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`target_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action,
-	FOREIGN KEY (`fee_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`source_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`source_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`target_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`target_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (`fee_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE set null
 );
 --> statement-breakpoint
 CREATE TABLE `wallets` (
@@ -59,7 +60,7 @@ CREATE TABLE `wallets` (
 	`balance` integer DEFAULT 0 NOT NULL,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE no action
+	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
 CREATE UNIQUE INDEX `transactions_nanoid_unique` ON `transactions` (`nanoid`);--> statement-breakpoint

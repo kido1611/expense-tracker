@@ -1,7 +1,7 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "e108e90f-8397-42a7-ac40-d6e2b67e3924",
+  "id": "3c715962-a3f6-4c69-8407-557a26692342",
   "prevId": "00000000-0000-0000-0000-000000000000",
   "tables": {
     "categories": {
@@ -19,6 +19,13 @@
           "type": "integer",
           "primaryKey": false,
           "notNull": true,
+          "autoincrement": false
+        },
+        "key": {
+          "name": "key",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
           "autoincrement": false
         },
         "name": {
@@ -55,8 +62,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "categories_user_id_users_id_fk": {
-          "name": "categories_user_id_users_id_fk",
+        "categories_user_id_foreign": {
+          "name": "categories_user_id_foreign",
           "tableFrom": "categories",
           "tableTo": "users",
           "columnsFrom": [
@@ -65,7 +72,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -175,8 +182,8 @@
         }
       },
       "foreignKeys": {
-        "transactions_user_id_users_id_fk": {
-          "name": "transactions_user_id_users_id_fk",
+        "transactions_user_id_foreign": {
+          "name": "transactions_user_id_foreign",
           "tableFrom": "transactions",
           "tableTo": "users",
           "columnsFrom": [
@@ -185,11 +192,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "transactions_wallet_id_wallets_id_fk": {
-          "name": "transactions_wallet_id_wallets_id_fk",
+        "transactions_wallet_id_foreign": {
+          "name": "transactions_wallet_id_foreign",
           "tableFrom": "transactions",
           "tableTo": "wallets",
           "columnsFrom": [
@@ -198,11 +205,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "transactions_category_id_categories_id_fk": {
-          "name": "transactions_category_id_categories_id_fk",
+        "transactions_category_id_foreign": {
+          "name": "transactions_category_id_foreign",
           "tableFrom": "transactions",
           "tableTo": "categories",
           "columnsFrom": [
@@ -211,7 +218,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
@@ -357,8 +364,8 @@
       },
       "indexes": {},
       "foreignKeys": {
-        "wallet_transfers_source_wallet_id_wallets_id_fk": {
-          "name": "wallet_transfers_source_wallet_id_wallets_id_fk",
+        "wallet_transfers_source_wallet_id_foreign": {
+          "name": "wallet_transfers_source_wallet_id_foreign",
           "tableFrom": "wallet_transfers",
           "tableTo": "wallets",
           "columnsFrom": [
@@ -367,11 +374,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "wallet_transfers_source_transaction_id_transactions_id_fk": {
-          "name": "wallet_transfers_source_transaction_id_transactions_id_fk",
+        "wallet_transfers_source_transaction_id_foreign": {
+          "name": "wallet_transfers_source_transaction_id_foreign",
           "tableFrom": "wallet_transfers",
           "tableTo": "transactions",
           "columnsFrom": [
@@ -380,11 +387,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "wallet_transfers_target_wallet_id_wallets_id_fk": {
-          "name": "wallet_transfers_target_wallet_id_wallets_id_fk",
+        "wallet_transfers_target_wallet_id_foreign": {
+          "name": "wallet_transfers_target_wallet_id_foreign",
           "tableFrom": "wallet_transfers",
           "tableTo": "wallets",
           "columnsFrom": [
@@ -393,11 +400,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "wallet_transfers_target_transaction_id_transactions_id_fk": {
-          "name": "wallet_transfers_target_transaction_id_transactions_id_fk",
+        "wallet_transfers_target_transaction_id_foreign": {
+          "name": "wallet_transfers_target_transaction_id_foreign",
           "tableFrom": "wallet_transfers",
           "tableTo": "transactions",
           "columnsFrom": [
@@ -406,11 +413,11 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         },
-        "wallet_transfers_fee_transaction_id_transactions_id_fk": {
-          "name": "wallet_transfers_fee_transaction_id_transactions_id_fk",
+        "wallet_transfers_fee_transaction_id_foreign": {
+          "name": "wallet_transfers_fee_transaction_id_foreign",
           "tableFrom": "wallet_transfers",
           "tableTo": "transactions",
           "columnsFrom": [
@@ -419,7 +426,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "set null",
           "onUpdate": "no action"
         }
       },
@@ -506,8 +513,8 @@
         }
       },
       "foreignKeys": {
-        "wallets_user_id_users_id_fk": {
-          "name": "wallets_user_id_users_id_fk",
+        "wallets_user_id_foreign": {
+          "name": "wallets_user_id_foreign",
           "tableFrom": "wallets",
           "tableTo": "users",
           "columnsFrom": [
@@ -516,7 +523,7 @@
           "columnsTo": [
             "id"
           ],
-          "onDelete": "no action",
+          "onDelete": "cascade",
           "onUpdate": "no action"
         }
       },
