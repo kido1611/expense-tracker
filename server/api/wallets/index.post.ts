@@ -1,7 +1,8 @@
 import type { H3Event } from "h3";
 import { nanoid } from "nanoid";
 import { walletSchema } from "~/utils/zodSchema";
-import { eq, and, sql } from "drizzle-orm";
+import { eq, and } from "drizzle-orm";
+import { format } from "date-fns";
 
 export default defineEventHandler(async (event: H3Event) => {
   const validatedBody = await readValidatedBody(event, walletSchema.parse);
@@ -24,6 +25,7 @@ export default defineEventHandler(async (event: H3Event) => {
       nanoid: nanoid(),
       name: validatedBody.name,
       balance: validatedBody.balance,
+      icon: validatedBody.icon,
     })
     .returning();
 
@@ -32,7 +34,7 @@ export default defineEventHandler(async (event: H3Event) => {
     const category = await useDrizzle().query.categories.findFirst({
       where: and(
         eq(tables.categories.userId, userId),
-        eq(tables.categories.key, "income_other"),
+        eq(tables.categories.key, "income_balance"),
       ),
     });
 
@@ -45,8 +47,9 @@ export default defineEventHandler(async (event: H3Event) => {
           categoryId: category.id,
           nanoid: nanoid(),
           amount: validatedBody.balance,
+          realAmount: validatedBody.balance,
           isVisibleInReport: true,
-          spendAt: sql`(CURRENT_TIMESTAMP)`,
+          spendAt: format(new Date(), "yyyy-MM-dd"),
         });
     }
   }

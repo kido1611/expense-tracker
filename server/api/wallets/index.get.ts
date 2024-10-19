@@ -18,6 +18,7 @@ export default defineEventHandler(async (event: H3Event) => {
       nanoid: tables.wallets.nanoid,
       name: tables.wallets.name,
       balance: tables.wallets.balance,
+      icon: tables.wallets.icon,
       created_at: tables.wallets.createdAt,
     })
     .from(tables.wallets)
