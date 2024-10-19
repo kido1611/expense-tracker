@@ -29,6 +29,7 @@ export const wallets = sqliteTable(
     nanoid: text("nanoid").notNull().unique(),
     name: text("name").notNull(),
     balance: integer("balance").notNull().default(0),
+    icon: text("icon"),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
@@ -59,6 +60,7 @@ export const categories = sqliteTable(
     key: text("key"),
     name: text("name").notNull(),
     isExpense: integer("is_expense", { mode: "boolean" }).default(false),
+    icon: text("icon"),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
@@ -87,6 +89,8 @@ export const transactions = sqliteTable(
 
     nanoid: text("nanoid").notNull().unique(),
     amount: integer("amount").notNull().default(0),
+    realAmount: integer("real_amount").notNull().default(0),
+    imagePath: text("image_path"),
     note: text("note"),
     isVisibleInReport: integer("is_visible_in_report", {
       mode: "boolean",

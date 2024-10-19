@@ -4,6 +4,7 @@ CREATE TABLE `categories` (
 	`key` text,
 	`name` text NOT NULL,
 	`is_expense` integer DEFAULT false,
+	`icon` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
@@ -16,6 +17,8 @@ CREATE TABLE `transactions` (
 	`category_id` integer NOT NULL,
 	`nanoid` text NOT NULL,
 	`amount` integer DEFAULT 0 NOT NULL,
+	`real_amount` integer DEFAULT 0 NOT NULL,
+	`image_path` text,
 	`note` text,
 	`is_visible_in_report` integer DEFAULT true,
 	`spend_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
@@ -58,6 +61,7 @@ CREATE TABLE `wallets` (
 	`nanoid` text NOT NULL,
 	`name` text NOT NULL,
 	`balance` integer DEFAULT 0 NOT NULL,
+	`icon` text,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
