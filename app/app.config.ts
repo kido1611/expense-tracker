@@ -12,5 +12,10 @@ export default defineAppConfig({
         size: "lg",
       },
     },
+    select: {
+      default: {
+        size: "lg",
+      },
+    },
   },
 });
