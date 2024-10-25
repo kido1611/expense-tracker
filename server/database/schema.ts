@@ -30,6 +30,7 @@ export const wallets = sqliteTable(
     name: text("name").notNull(),
     balance: integer("balance").notNull().default(0),
     icon: text("icon"),
+    sortOrder: integer("sort_order").default(1),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
@@ -61,6 +62,7 @@ export const categories = sqliteTable(
     name: text("name").notNull(),
     isExpense: integer("is_expense", { mode: "boolean" }).default(false),
     icon: text("icon"),
+    sortOrder: integer("sort_order").default(1),
     createdAt: text("created_at")
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`),
