@@ -1,8 +1,17 @@
 <script setup lang="ts">
+import type { LoadingGlobal } from '@/utils/keys'
 import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
-const isLoading = ref<boolean>(false);
+
+const emit = defineEmits<{
+  close: []
+}>();
+
+const { isLoading, setLoading } = inject<LoadingGlobal>("loading-global", {
+  isLoading: false,
+  setLoading: () => { }
+})
 
 type Schema = z.output<typeof walletSchema>;
 const state = reactive({
@@ -75,7 +84,7 @@ const icons = [
 ];
 
 async function onSubmit(event: FormSubmitEvent<Schema>) {
-  isLoading.value = true;
+  setLoading(true)
 
   await $fetch("/api/wallets", {
     method: "POST",
@@ -88,71 +97,39 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
       refreshNuxtData("wallets");
       refreshNuxtData("latest-transactions");
+
+      emit('close')
     })
     .catch((_err) => {
       // TODO: error on backend validation
     })
     .finally(() => {
-      isLoading.value = false;
+      setLoading(false)
     });
 }
 </script>
 
 <template>
-  <div>
-    <p>Tambah Wallet</p>
-
-    <UForm
-      :schema="walletSchema"
-      :state="state"
-      class="flex flex-col space-y-5"
-      @submit="onSubmit"
-    >
-      <UFormGroup label="Name" name="name" required>
-        <UInput
-          v-model="state.name"
-          type="text"
-          required
-          :disabled="isLoading"
-        />
-      </UFormGroup>
-      <UFormGroup label="Balance" name="balance" required>
-        <UInput
-          v-model="state.balance"
-          type="number"
-          required
-          min="0"
-          :disabled="isLoading"
-        />
-      </UFormGroup>
-      <UFormGroup label="Icon" name="icon" required>
-        <USelectMenu
-          v-model="state.icon"
-          :options="icons"
-          option-attribute="label"
-          value-attribute="icon"
-          searchable
-          searchable-placeholder="Find icon..."
-          clear-search-on-close
-          placeholder="Find icon"
-          required
-          :disabled="isLoading"
-        >
-          <template #label>
-            <template v-if="selectedIcon">
-              <UIcon :name="selectedIcon.icon" class="flex-none size-5" />
-              <p class="">{{ selectedIcon.label }}</p>
-            </template>
+  <UForm :schema="walletSchema" :state="state" class="flex flex-col space-y-5" @submit="onSubmit">
+    <UFormGroup label="Name" name="name" required>
+      <UInput v-model="state.name" type="text" required :disabled="isLoading" />
+    </UFormGroup>
+    <UFormGroup label="Balance" name="balance" required>
+      <UInput v-model="state.balance" type="number" required min="0" :disabled="isLoading" />
+    </UFormGroup>
+    <UFormGroup label="Icon" name="icon" required>
+      <USelectMenu
+v-model="state.icon" :options="icons" option-attribute="label" value-attribute="icon" searchable
+        searchable-placeholder="Find icon..." clear-search-on-close placeholder="Find icon" required
+        :disabled="isLoading">
+        <template #label>
+          <template v-if="selectedIcon">
+            <UIcon :name="selectedIcon.icon" class="flex-none size-5" />
+            <p class="">{{ selectedIcon.label }}</p>
           </template>
-        </USelectMenu>
-      </UFormGroup>
-      <UButton
-        type="submit"
-        class="self-start"
-        :loading="isLoading"
-        icon="i-tabler-plus"
-        >Add</UButton
-      >
-    </UForm>
-  </div>
+        </template>
+      </USelectMenu>
+    </UFormGroup>
+    <UButton type="submit" class="self-start" :loading="isLoading" icon="i-tabler-plus">Add</UButton>
+  </UForm>
 </template>
