@@ -41,6 +41,7 @@ export default defineEventHandler(async (event: H3Event) => {
     .orderBy(
       desc(tables.transactions.spendAt),
       desc(tables.transactions.createdAt),
+      desc(tables.transactions.id)
     )
     .limit(query.limit)
     .offset(query.limit * (query.page - 1));
