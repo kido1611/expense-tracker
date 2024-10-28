@@ -5,6 +5,10 @@ const props = defineProps<{
   wallet: Wallet;
 }>();
 
+const emits = defineEmits<{
+  transfer: [walletNanoid: string];
+}>();
+
 const isDeleteLoading = ref<boolean>(false);
 async function deleteWallet() {
   isDeleteLoading.value = true;
@@ -25,6 +29,15 @@ async function deleteWallet() {
 }
 
 const dropdownItems = [
+  [
+    {
+      label: "Transfer",
+      icon: "i-tabler-transfer",
+      click: () => {
+        emits("transfer", props.wallet.nanoid);
+      },
+    },
+  ],
   [
     {
       label: "Delete",
