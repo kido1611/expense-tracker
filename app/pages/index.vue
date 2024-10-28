@@ -17,10 +17,10 @@ provide("loading-global", {
   setLoading: setLoadingGlobal,
 });
 
-const isAddWalletSlideOverVisible = ref<boolean>(false);
-const isAddTransactionSlideOverVisible = ref<boolean>(false);
+const isAddWalletSlideoverVisible = ref<boolean>(false);
+const isAddTransactionSlideoverVisible = ref<boolean>(false);
 const {
-  isSlideoverVisible: isWalletTransferSlideOverVisible,
+  isSlideoverVisible: isWalletTransferSlideoverVisible,
   selectedWallet: selectedWalletTransfer,
   open: openWalletTransfer,
   close: closeWalletTransfer,
@@ -86,13 +86,13 @@ function useWalletTransfer() {
       <UButton
         type="button"
         icon="i-tabler-plus"
-        @click="isAddWalletSlideOverVisible = true"
+        @click="isAddWalletSlideoverVisible = true"
         >Add Wallet</UButton
       >
       <UButton
         type="button"
         icon="i-tabler-plus"
-        @click="isAddTransactionSlideOverVisible = true"
+        @click="isAddTransactionSlideoverVisible = true"
         >Add Transaction
       </UButton>
       <UButton
@@ -103,118 +103,22 @@ function useWalletTransfer() {
       </UButton>
     </div>
 
-    <USlideover
-      v-model="isAddWalletSlideOverVisible"
-      :prevent-close="isLoadingGlobal"
-      :ui="{
-        base: 'h-[\'100vh\'] overflow-y-auto',
-      }"
-    >
-      <UCard
-        class="flex flex-col flex-1"
-        :ui="{
-          body: { base: 'flex-1' },
-          ring: '',
-          divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-        }"
-      >
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3
-              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-            >
-              Add Wallet
-            </h3>
-            <UButton
-              :loading="isLoadingGlobal"
-              color="gray"
-              variant="ghost"
-              icon="i-tabler-x"
-              class="-my-1"
-              @click="isAddWalletSlideOverVisible = false"
-            />
-          </div>
-        </template>
-
-        <WalletForm @close="isAddWalletSlideOverVisible = false" />
-      </UCard>
-    </USlideover>
-    <USlideover
-      v-model="isAddTransactionSlideOverVisible"
-      :prevent-close="isLoadingGlobal"
-      :ui="{
-        base: 'h-[\'100vh\'] overflow-y-auto',
-      }"
-    >
-      <UCard
-        class="flex flex-col flex-1"
-        :ui="{
-          body: { base: 'flex-1' },
-          ring: '',
-          divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-        }"
-      >
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3
-              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-            >
-              Add Transaction
-            </h3>
-            <UButton
-              :loading="isLoadingGlobal"
-              color="gray"
-              variant="ghost"
-              icon="i-tabler-x"
-              class="-my-1"
-              @click="isAddTransactionSlideOverVisible = false"
-            />
-          </div>
-        </template>
-
-        <TransactionForm @close="isAddTransactionSlideOverVisible = false" />
-      </UCard>
-    </USlideover>
-    <USlideover
-      v-model="isWalletTransferSlideOverVisible"
-      :prevent-close="isLoadingGlobal"
-      :ui="{
-        base: 'h-[\'100vh\'] overflow-y-auto',
-      }"
-    >
-      <UCard
-        class="flex flex-col flex-1"
-        :ui="{
-          body: { base: 'flex-1' },
-          ring: '',
-          divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-        }"
-      >
-        <template #header>
-          <div class="flex items-center justify-between">
-            <h3
-              class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-            >
-              Transfer Wallet
-            </h3>
-            <UButton
-              :loading="isLoadingGlobal"
-              color="gray"
-              variant="ghost"
-              icon="i-tabler-x"
-              class="-my-1"
-              @click="closeWalletTransfer"
-            />
-          </div>
-        </template>
-
-        <WalletTransferForm
-          :selected-wallet="selectedWalletTransfer"
-          @close="closeWalletTransfer"
-        />
-      </UCard>
-    </USlideover>
-
+    <LazyWalletSlideover
+      v-model:is-loading="isLoadingGlobal"
+      v-model:is-visible="isAddWalletSlideoverVisible"
+      @close="isAddWalletSlideoverVisible = false"
+    />
+    <LazyTransactionSlideover
+      v-model:is-loading="isLoadingGlobal"
+      v-model:is-visible="isAddTransactionSlideoverVisible"
+      @close="isAddTransactionSlideoverVisible = false"
+    />
+    <LazyWalletTransferSlideover
+      v-model:is-loading="isLoadingGlobal"
+      v-model:selected="selectedWalletTransfer"
+      v-model:is-visible="isWalletTransferSlideoverVisible"
+      @close="closeWalletTransfer"
+    />
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 py-8">
       <div>
         <div
