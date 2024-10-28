@@ -33,6 +33,9 @@ const { data: transactionsData } = await useFetch<Transaction[]>(
   "/api/transactions",
   {
     key: "latest-transactions",
+    query: {
+      limit: 5,
+    },
   },
 );
 
