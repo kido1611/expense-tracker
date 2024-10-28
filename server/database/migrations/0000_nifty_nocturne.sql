@@ -5,6 +5,7 @@ CREATE TABLE `categories` (
 	`name` text NOT NULL,
 	`is_expense` integer DEFAULT false,
 	`icon` text,
+	`sort_order` integer DEFAULT 1,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
@@ -29,6 +30,8 @@ CREATE TABLE `transactions` (
 	FOREIGN KEY (`category_id`) REFERENCES `categories`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `transactions_nanoid_unique` ON `transactions` (`nanoid`);--> statement-breakpoint
+CREATE INDEX `transactions_nanoid_idx` ON `transactions` (`nanoid`);--> statement-breakpoint
 CREATE TABLE `users` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`uuid` text NOT NULL,
@@ -39,6 +42,8 @@ CREATE TABLE `users` (
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL
 );
 --> statement-breakpoint
+CREATE UNIQUE INDEX `users_uuid_unique` ON `users` (`uuid`);--> statement-breakpoint
+CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE TABLE `wallet_transfers` (
 	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
 	`source_wallet_id` integer NOT NULL,
@@ -62,15 +67,12 @@ CREATE TABLE `wallets` (
 	`name` text NOT NULL,
 	`balance` integer DEFAULT 0 NOT NULL,
 	`icon` text,
+	`sort_order` integer DEFAULT 1,
 	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
 	FOREIGN KEY (`user_id`) REFERENCES `users`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE UNIQUE INDEX `transactions_nanoid_unique` ON `transactions` (`nanoid`);--> statement-breakpoint
-CREATE INDEX `transactions_nanoid_idx` ON `transactions` (`nanoid`);--> statement-breakpoint
-CREATE UNIQUE INDEX `users_uuid_unique` ON `users` (`uuid`);--> statement-breakpoint
-CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
 CREATE UNIQUE INDEX `wallets_nanoid_unique` ON `wallets` (`nanoid`);--> statement-breakpoint
 CREATE INDEX `wallets_nanoid_idx` ON `wallets` (`nanoid`);--> statement-breakpoint
 CREATE INDEX `wallets_name_idx` ON `wallets` (`name`);
