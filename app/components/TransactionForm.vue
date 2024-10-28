@@ -131,7 +131,7 @@ async function onFileSelect(fileList: File[]) {
       <!-- TODO: save last selected wallet -->
       <USelectMenu
 v-model="state.walletNanoid" :options="walletsData" option-attribute="name" value-attribute="nanoid"
-        searchable searchable-placeholder="Find a wallet..." clear-search-on-close placeholder="Find wallet" required
+        searchable searchable-placeholder="Find wallet..." clear-search-on-close placeholder="Find wallet" required
         :disabled="isLoading">
         <template #label>
           <template v-if="selectedWallet">
@@ -167,8 +167,8 @@ v-model="state.walletNanoid" :options="walletsData" option-attribute="name" valu
     <UFormGroup label="Category" name="categoryId" required>
       <USelectMenu
 v-model="state.categoryId" :options="categoriesData" option-attribute="name" value-attribute="id"
-        searchable searchable-placeholder="Find a category..." clear-search-on-close placeholder="Find category"
-        required :disabled="isLoading">
+        searchable searchable-placeholder="Find category..." clear-search-on-close placeholder="Find category" required
+        :disabled="isLoading">
         <template #label>
           <template v-if="selectedCategory">
             <UIcon
@@ -205,6 +205,7 @@ v-model="state.categoryId" :options="categoriesData" option-attribute="name" val
         </template>
       </USelectMenu>
     </UFormGroup>
+    <!-- TODO: set max input value based on selected wallet -->
     <UFormGroup label="Amount" name="amount" required>
       <UInput v-model="state.amount" type="number" required :disabled="isLoading" />
     </UFormGroup>
