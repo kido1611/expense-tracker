@@ -21,57 +21,78 @@ export default defineEventHandler(async (event: H3Event) => {
     validatedParams.nanoid,
   );
 
-  const walletTransfer = await getWalletTransferByTransactionId(transaction.id)
+  const walletTransfer = await getWalletTransferByTransactionId(transaction.id);
 
   const deleteTransactions = [];
   const updateWallets = new Map<number, number>();
 
   if (!walletTransfer) {
-    deleteTransactions.push(transaction.id)
+    deleteTransactions.push(transaction.id);
 
-    updateWallets.set(transaction.walletId, transaction.realAmount * -1)
+    updateWallets.set(transaction.walletId, transaction.realAmount * -1);
 
-    await deleteTransactionImage(transaction)
+    await deleteTransactionImage(transaction);
   } else {
     const transactionIds = [
-      walletTransfer.sourceTransactionId, walletTransfer.targetTransactionId,
-      ...(walletTransfer.feeTransactionId ? [walletTransfer.feeTransactionId] : [])
+      walletTransfer.sourceTransactionId,
+      walletTransfer.targetTransactionId,
+      ...(walletTransfer.feeTransactionId
+        ? [walletTransfer.feeTransactionId]
+        : []),
     ];
 
     const transactions = await useDrizzle().query.transactions.findMany({
       where: and(
         eq(tables.transactions.userId, user.id),
-        inArray(tables.transactions.id, transactionIds)
-      )
-    })
-
-    transactions.forEach(item => {
-      deleteTransactions.push(item.id)
-      updateWallets.set(item.walletId, (updateWallets.get(item.walletId) ?? 0) - item.realAmount)
+        inArray(tables.transactions.id, transactionIds),
+      ),
     });
 
-    await useDrizzle().delete(tables.walletTransfers)
-      .where(eq(tables.walletTransfers.id, walletTransfer.id))
+    transactions.forEach((item) => {
+      deleteTransactions.push(item.id);
+      updateWallets.set(
+        item.walletId,
+        (updateWallets.get(item.walletId) ?? 0) - item.realAmount,
+      );
+    });
+
+    await useDrizzle()
+      .delete(tables.walletTransfers)
+      .where(
+        and(
+          eq(
+            tables.walletTransfers.sourceTransactionId,
+            walletTransfer.sourceTransactionId,
+          ),
+          eq(
+            tables.walletTransfers.targetTransactionId,
+            walletTransfer.targetTransactionId,
+          ),
+        ),
+      );
 
     // TODO: Delete image transaction if exist
   }
 
-  await useDrizzle().delete(tables.transactions)
-    .where(and(
-      inArray(tables.transactions.id, deleteTransactions),
-      eq(tables.transactions.userId, user.id)
-    ))
+  await useDrizzle()
+    .delete(tables.transactions)
+    .where(
+      and(
+        inArray(tables.transactions.id, deleteTransactions),
+        eq(tables.transactions.userId, user.id),
+      ),
+    );
 
   updateWallets.forEach(async (value, key) => {
-    await useDrizzle().update(tables.wallets)
+    await useDrizzle()
+      .update(tables.wallets)
       .set({
-        balance: sql`${tables.wallets.balance} + ${value}`
+        balance: sql`${tables.wallets.balance} + ${value}`,
       })
-      .where(and(
-        eq(tables.wallets.userId, user.id),
-        eq(tables.wallets.id, key)
-      ))
-  })
+      .where(
+        and(eq(tables.wallets.userId, user.id), eq(tables.wallets.id, key)),
+      );
+  });
 
   return {
     nanoid: transaction.nanoid,
@@ -81,5 +102,5 @@ export default defineEventHandler(async (event: H3Event) => {
     spend_at: transaction.spendAt,
     is_visible_in_report: transaction.isVisibleInReport,
     created_at: transaction.createdAt,
-  }
+  };
 });
