@@ -10,6 +10,12 @@ export default defineNuxtConfig({
     blob: true,
     database: true,
   },
+  nitro: {
+    experimental: {
+      tasks: true,
+      openAPI: true,
+    },
+  },
   runtimeConfig: {
     session: {
       maxAge: 60 * 60 * 24, // 2 Hours
