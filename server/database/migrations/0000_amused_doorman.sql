@@ -44,18 +44,13 @@ CREATE TABLE `users` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `users_uuid_unique` ON `users` (`uuid`);--> statement-breakpoint
 CREATE UNIQUE INDEX `users_email_unique` ON `users` (`email`);--> statement-breakpoint
+CREATE INDEX `users_uuid_idx` ON `users` (`uuid`);--> statement-breakpoint
 CREATE TABLE `wallet_transfers` (
-	`id` integer PRIMARY KEY AUTOINCREMENT NOT NULL,
-	`source_wallet_id` integer NOT NULL,
 	`source_transaction_id` integer NOT NULL,
-	`target_wallet_id` integer NOT NULL,
 	`target_transaction_id` integer NOT NULL,
 	`fee_transaction_id` integer,
-	`created_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	`updated_at` text DEFAULT (CURRENT_TIMESTAMP) NOT NULL,
-	FOREIGN KEY (`source_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE cascade,
+	PRIMARY KEY(`source_transaction_id`, `target_transaction_id`),
 	FOREIGN KEY (`source_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE cascade,
-	FOREIGN KEY (`target_wallet_id`) REFERENCES `wallets`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`target_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE cascade,
 	FOREIGN KEY (`fee_transaction_id`) REFERENCES `transactions`(`id`) ON UPDATE no action ON DELETE set null
 );
@@ -75,4 +70,5 @@ CREATE TABLE `wallets` (
 --> statement-breakpoint
 CREATE UNIQUE INDEX `wallets_nanoid_unique` ON `wallets` (`nanoid`);--> statement-breakpoint
 CREATE INDEX `wallets_nanoid_idx` ON `wallets` (`nanoid`);--> statement-breakpoint
+CREATE INDEX `wallets_user_id_idx` ON `wallets` (`user_id`);--> statement-breakpoint
 CREATE INDEX `wallets_name_idx` ON `wallets` (`name`);

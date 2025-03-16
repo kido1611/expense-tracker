@@ -5,21 +5,31 @@ import {
   integer,
   index,
   foreignKey,
+  primaryKey,
 } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable("users", {
-  id: integer("id").primaryKey({ autoIncrement: true }),
-  uuid: text("uuid").notNull().unique(),
-  name: text("name").notNull(),
-  email: text("email").notNull().unique(),
-  password: text("password").notNull(),
-  createdAt: text("created_at")
-    .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`),
-  updatedAt: text("updated_at")
-    .notNull()
-    .default(sql`(CURRENT_TIMESTAMP)`),
-});
+export const users = sqliteTable(
+  "users",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    uuid: text("uuid").notNull().unique(),
+    name: text("name").notNull(),
+    email: text("email").notNull().unique(),
+    password: text("password").notNull(),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => {
+    return {
+      uuidIdx: index("users_uuid_idx").on(table.uuid),
+    };
+  },
+);
 
 export const wallets = sqliteTable(
   "wallets",
@@ -36,11 +46,13 @@ export const wallets = sqliteTable(
       .default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text("updated_at")
       .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => {
     return {
       nanoidIdx: index("wallets_nanoid_idx").on(table.nanoid),
+      userIdIdx: index("wallets_user_id_idx").on(table.userId),
       nameIdx: index("wallets_name_idx").on(table.name),
       userReference: foreignKey({
         columns: [table.userId],
@@ -68,7 +80,8 @@ export const categories = sqliteTable(
       .default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text("updated_at")
       .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => {
     return {
@@ -90,10 +103,13 @@ export const transactions = sqliteTable(
     categoryId: integer("category_id").notNull(),
 
     nanoid: text("nanoid").notNull().unique(),
+    //  store absoslute amount
     amount: integer("amount").notNull().default(0),
+    // store signed amount
     realAmount: integer("real_amount").notNull().default(0),
     imagePath: text("image_path"),
     note: text("note"),
+    // form has option to hide transaction from report
     isVisibleInReport: integer("is_visible_in_report", {
       mode: "boolean",
     }).default(true),
@@ -107,7 +123,8 @@ export const transactions = sqliteTable(
       .default(sql`(CURRENT_TIMESTAMP)`),
     updatedAt: text("updated_at")
       .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => {
     return {
@@ -134,35 +151,19 @@ export const transactions = sqliteTable(
 export const walletTransfers = sqliteTable(
   "wallet_transfers",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    sourceWalletId: integer("source_wallet_id").notNull(),
     sourceTransactionId: integer("source_transaction_id").notNull(),
-    targetWalletId: integer("target_wallet_id").notNull(),
     targetTransactionId: integer("target_transaction_id").notNull(),
     feeTransactionId: integer("fee_transaction_id"),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
   },
   (table) => {
     return {
-      sourceWalletReference: foreignKey({
-        columns: [table.sourceWalletId],
-        foreignColumns: [wallets.id],
-        name: "wallet_transfers_source_wallet_id_foreign",
-      }).onDelete("cascade"),
+      primaryKey: primaryKey({
+        columns: [table.sourceTransactionId, table.targetTransactionId],
+      }),
       sourceTransactionReference: foreignKey({
         columns: [table.sourceTransactionId],
         foreignColumns: [transactions.id],
         name: "wallet_transfers_source_transaction_id_foreign",
-      }).onDelete("cascade"),
-      targetWalletReference: foreignKey({
-        columns: [table.targetWalletId],
-        foreignColumns: [wallets.id],
-        name: "wallet_transfers_target_wallet_id_foreign",
       }).onDelete("cascade"),
       targetTransactionReference: foreignKey({
         columns: [table.targetTransactionId],
