@@ -18,6 +18,7 @@ export type Transaction = {
   image_path: string | null | undefined;
   spend_at: string;
   is_visible_in_report: boolean;
+  is_transfer: boolean;
   created_at: string;
   wallet: Wallet;
   category: TransactionCategory;
