@@ -1,20 +1,44 @@
 export default defineAppConfig({
   ui: {
-    primary: "yellow",
-    gray: "neutral",
+    colors: {
+      primary: "orange",
+      neutral: "zinc",
+    },
     button: {
-      default: {
+      defaultVariants: {
         size: "lg",
       },
     },
     input: {
-      default: {
+      slots: {
+        root: "relative flex items-center",
+      },
+      defaultVariants: {
         size: "lg",
       },
     },
-    select: {
-      default: {
+    inputNumber: {
+      slots: {
+        root: "relative flex items-center",
+      },
+      defaultVariants: {
         size: "lg",
+      },
+    },
+    textarea: {
+      slots: {
+        root: "relative flex items-center",
+      },
+      defaultVariants: {
+        size: "lg",
+      },
+    },
+    selectMenu: {
+      defaultVariants: {
+        size: "lg",
+      },
+      slots: {
+        base: "flex w-full",
       },
     },
   },

@@ -6,7 +6,6 @@ definePageMeta({
 });
 
 const { user, loggedIn, clear } = useUserSession();
-const route = useRoute();
 
 const isLoadingGlobal = ref(false);
 function setLoadingGlobal(current: boolean) {
@@ -17,13 +16,10 @@ provide("loading-global", {
   setLoading: setLoadingGlobal,
 });
 
-const isAddWalletSlideoverVisible = ref<boolean>(false);
-const isAddTransactionSlideoverVisible = ref<boolean>(false);
 const {
   isSlideoverVisible: isWalletTransferSlideoverVisible,
   selectedWallet: selectedWalletTransfer,
   open: openWalletTransfer,
-  close: closeWalletTransfer,
 } = useWalletTransfer();
 
 const { data: walletsData } = await useFetch<Wallet[]>("/api/wallets", {
@@ -54,28 +50,16 @@ function useWalletTransfer() {
     selectedWallet.value = walletNanoid;
   }
 
-  function close() {
-    isSlideoverVisible.value = false;
-    selectedWallet.value = null;
-  }
-
   return {
     isSlideoverVisible,
     selectedWallet,
     open,
-    close,
   };
 }
 </script>
 
 <template>
   <UContainer>
-    <h1>Nuxt Routing set up successfully!</h1>
-    <p>Current route: {{ route.path }}</p>
-    <a href="https://nuxt.com/docs/getting-started/routing" target="_blank"
-      >Learn more about Nuxt Routing</a
-    >
-
     <p>
       {{ loggedIn }}
       {{ user }}
@@ -86,42 +70,15 @@ function useWalletTransfer() {
     >
 
     <div class="flex flex-row flex-wrap gap-x-4 mt-8">
-      <UButton
-        type="button"
-        icon="i-tabler-plus"
-        @click="isAddWalletSlideoverVisible = true"
-        >Add Wallet</UButton
-      >
-      <UButton
-        type="button"
-        icon="i-tabler-plus"
-        @click="isAddTransactionSlideoverVisible = true"
-        >Add Transaction
-      </UButton>
-      <UButton
-        type="button"
-        icon="i-tabler-transfer"
-        @click="openWalletTransfer('')"
-        >Transfer Wallet
-      </UButton>
+      <WalletSlideover v-model:is-loading="isLoadingGlobal" />
+      <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
+      <WalletTransferSlideover
+        v-model:is-loading="isLoadingGlobal"
+        v-model:selected="selectedWalletTransfer"
+        v-model:is-visible="isWalletTransferSlideoverVisible"
+      />
     </div>
 
-    <LazyWalletSlideover
-      v-model:is-loading="isLoadingGlobal"
-      v-model:is-visible="isAddWalletSlideoverVisible"
-      @close="isAddWalletSlideoverVisible = false"
-    />
-    <LazyTransactionSlideover
-      v-model:is-loading="isLoadingGlobal"
-      v-model:is-visible="isAddTransactionSlideoverVisible"
-      @close="isAddTransactionSlideoverVisible = false"
-    />
-    <LazyWalletTransferSlideover
-      v-model:is-loading="isLoadingGlobal"
-      v-model:selected="selectedWalletTransfer"
-      v-model:is-visible="isWalletTransferSlideoverVisible"
-      @close="closeWalletTransfer"
-    />
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 py-8">
       <div>
         <div

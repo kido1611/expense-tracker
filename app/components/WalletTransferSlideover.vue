@@ -1,54 +1,31 @@
 <script setup lang="ts">
-const isVisible = defineModel<boolean>("isVisible", {
-  default: false,
-});
 const isLoading = defineModel<boolean>("isLoading", {
-  default: false,
+    default: false,
 });
 const selected = defineModel<string | null>("selected", {
-  default: "",
+    default: "",
 });
-
-const emit = defineEmits<{
-  close: [];
-}>();
+const open = defineModel<boolean>("isVisible", {
+    default: false,
+});
 </script>
 
 <template>
-  <USlideover
-    v-model="isVisible"
-    :prevent-close="isLoading"
-    :ui="{
-      base: 'h-[\'100vh\'] overflow-y-auto',
-    }"
-  >
-    <UCard
-      class="flex flex-col flex-1"
-      :ui="{
-        body: { base: 'flex-1' },
-        ring: '',
-        divide: 'divide-y divide-gray-100 dark:divide-gray-800',
-      }"
+    <USlideover
+        v-model:open="open"
+        :dismissible="!isLoading"
+        :close="!isLoading"
+        title="Transfer Wallet"
     >
-      <template #header>
-        <div class="flex items-center justify-between">
-          <h3
-            class="text-base font-semibold leading-6 text-gray-900 dark:text-white"
-          >
-            Transfer Wallet
-          </h3>
-          <UButton
-            :loading="isLoading"
-            color="gray"
-            variant="ghost"
-            icon="i-tabler-x"
-            class="-my-1"
-            @click="emit('close')"
-          />
-        </div>
-      </template>
-
-      <WalletTransferForm :selected-wallet="selected" @close="emit('close')" />
-    </UCard>
-  </USlideover>
+        <UButton type="button" icon="i-tabler-transfer"
+            >Transfer Wallet</UButton
+        >
+        <template #body>
+            <LazyWalletTransferForm
+                hydrate-on-visible
+                :selected-wallet="selected"
+                @close="open = false"
+            />
+        </template>
+    </USlideover>
 </template>

@@ -44,17 +44,17 @@ async function deleteTransaction() {
   }
 }
 
-const dropdownItems = [
+const dropdownItems = ref([
   [
     {
       label: "Delete",
       icon: "i-tabler-trash",
-      click: () => {
+      onSelect() {
         deleteTransaction();
       },
     },
   ],
-];
+]);
 </script>
 
 <template>
@@ -68,25 +68,25 @@ const dropdownItems = [
       class="flex flex-row items-center gap-x-4 gap-y-2 mb-2"
     >
       <UBadge
-        v-if="!transaction.is_visible_in_report"
+        v-if="transaction.is_transfer"
         rounded
-        color="indigo"
+        color="warning"
         variant="subtle"
-        >Report Hidden</UBadge
+        >Transfer</UBadge
       >
       <UBadge
         v-if="transaction.image_path"
         rounded
-        color="pink"
+        color="secondary"
         variant="subtle"
         >With Image</UBadge
       >
       <UBadge
-        v-if="transaction.is_transfer"
+        v-if="!transaction.is_visible_in_report"
         rounded
-        color="amber"
+        color="error"
         variant="subtle"
-        >Transfer</UBadge
+        >Report Hidden</UBadge
       >
     </div>
     <div class="flex flex-row justify-between items-center gap-x-4">
@@ -106,18 +106,26 @@ const dropdownItems = [
           {{ realAmount }}
         </p>
       </div>
-      <UDropdown :items="dropdownItems" class="flex-none">
+      <UDropdownMenu
+        :items="dropdownItems"
+        class="flex-none"
+        :content="{
+          align: 'end',
+          side: 'bottom',
+        }"
+      >
         <UButton
-          color="white"
+          color="neutral"
+          variant="outline"
           square
           trailing-icon="i-tabler-dots-vertical"
-          size="sm"
+          size="md"
         />
-      </UDropdown>
+      </UDropdownMenu>
     </div>
     <p
       v-if="transaction.note"
-      class="whitespace-pre-line text-gray-400 mt-2 line-clamp-1"
+      class="whitespace-pre-line text-gray-400 mt-2 line-clamp-1 text-sm"
     >
       {{ transaction.note }}
     </p>

@@ -24,7 +24,7 @@ type Schema = z.output<typeof walletTransferSchema>;
 const state = reactive({
   fromWalletNanoid: "",
   toWalletNanoid: "",
-  amount: "",
+  amount: 0,
   note: "",
   transferAt: format(new Date(), "yyyy-MM-dd"),
   withFee: false,
@@ -50,7 +50,7 @@ const selectedToWallet = computed(() => {
   )[0];
 });
 
-const toWalletsData = computed(() => {
+const toWalletsList = computed(() => {
   if (!state.fromWalletNanoid) {
     return [];
   }
@@ -93,7 +93,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     .then(() => {
       state.fromWalletNanoid = "";
       state.toWalletNanoid = "";
-      state.amount = "";
+      state.amount = 0;
       state.note = "";
       state.transferAt = format(new Date(), "yyyy-MM-dd");
       state.withFee = false;
@@ -120,151 +120,145 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     class="flex flex-col space-y-5 max-w-md mx-auto"
     @submit="onSubmit"
   >
-    <UFormGroup label="From" name="fromWalletNanoid" required>
+    <UFormField label="From" name="fromWalletNanoid" required>
       <USelectMenu
         v-model="state.fromWalletNanoid"
-        :options="walletsData"
-        option-attribute="name"
-        value-attribute="nanoid"
-        searchable
-        searchable-placeholder="Find wallet..."
-        clear-search-on-close
-        placeholder="Find wallet"
+        value-key="nanoid"
+        label-key="name"
+        :icon="selectedFromWallet?.icon ?? undefined"
+        :items="walletsData"
         required
         :disabled="isLoading"
+        placeholder="Find wallet..."
       >
-        <template #label>
-          <template v-if="selectedFromWallet">
-            <UIcon
-              :name="selectedFromWallet.icon ?? 'i-tabler-wallet'"
-              class="flex-none size-5 text-primary"
-            />
-            <div class="flex flex-col space-y-0.5 px-1">
-              <p class="font-medium">{{ selectedFromWallet.name }}</p>
-              <p
-                :class="{
-                  'text-red-500': selectedFromWallet.balance < 0,
-                  'dark:text-gray-400 text-gray-500':
-                    selectedFromWallet.balance >= 0,
-                }"
-              >
-                {{ idrFormatter(selectedFromWallet.balance) }}
-              </p>
-            </div>
-          </template>
+        <template v-if="selectedFromWallet">
+          <div class="flex flex-col space-y-0.5 px-1 text-start">
+            <p class="font-medium">{{ selectedFromWallet.name }}</p>
+            <p
+              :class="{
+                'text-red-500': selectedFromWallet.balance < 0,
+                'dark:text-gray-400 text-gray-500':
+                  selectedFromWallet.balance >= 0,
+              }"
+            >
+              {{ idrFormatter(selectedFromWallet.balance) }}
+            </p>
+          </div>
         </template>
-        <template #option="{ option: wallet }">
+        <template #item="{ item }">
           <UIcon
-            :name="wallet.icon ?? 'i-tabler-wallet'"
+            :name="item.icon ?? 'i-tabler-wallet'"
             class="flex-none size-5 text-primary"
           />
           <div class="flex flex-col space-y-0.5 px-1">
-            <p class="font-medium">{{ wallet.name }}</p>
+            <p class="font-medium">{{ item.name }}</p>
             <p
               :class="{
-                'text-red-500': wallet.balance < 0,
-                'dark:text-gray-400 text-gray-500': wallet.balance >= 0,
+                'text-red-500': item.balance < 0,
+                'dark:text-gray-400 text-gray-500': item.balance >= 0,
               }"
             >
-              {{ idrFormatter(wallet.balance) }}
+              {{ idrFormatter(item.balance) }}
             </p>
           </div>
         </template>
       </USelectMenu>
-    </UFormGroup>
-    <UFormGroup label="To" name="toWalletNanoid" required>
+    </UFormField>
+    <UFormField label="To" name="toWalletNanoid" required>
       <USelectMenu
         v-model="state.toWalletNanoid"
-        :options="toWalletsData"
-        option-attribute="name"
-        value-attribute="nanoid"
-        searchable
-        searchable-placeholder="Find wallet..."
-        clear-search-on-close
-        placeholder="Find wallet"
+        value-key="nanoid"
+        label-key="name"
+        :icon="selectedToWallet?.icon ?? undefined"
+        :items="toWalletsList"
         required
         :disabled="isLoading || !selectedFromWallet"
+        placeholder="Find wallet..."
       >
-        <template #label>
-          <template v-if="selectedToWallet">
-            <UIcon
-              :name="selectedToWallet.icon ?? 'i-tabler-wallet'"
-              class="flex-none size-5 text-primary"
-            />
-            <div class="flex flex-col space-y-0.5 px-1">
-              <p class="font-medium">{{ selectedToWallet.name }}</p>
-              <p
-                :class="{
-                  'text-red-500': selectedToWallet.balance < 0,
-                  'dark:text-gray-400 text-gray-500':
-                    selectedToWallet.balance >= 0,
-                }"
-              >
-                {{ idrFormatter(selectedToWallet.balance) }}
-              </p>
-            </div>
-          </template>
+        <template v-if="selectedToWallet">
+          <div class="flex flex-col space-y-0.5 px-1 text-start">
+            <p class="font-medium">{{ selectedToWallet.name }}</p>
+            <p
+              :class="{
+                'text-red-500': selectedToWallet.balance < 0,
+                'dark:text-gray-400 text-gray-500':
+                  selectedToWallet.balance >= 0,
+              }"
+            >
+              {{ idrFormatter(selectedToWallet.balance) }}
+            </p>
+          </div>
         </template>
-        <template #option="{ option: wallet }">
+        <template #item="{ item }">
           <UIcon
-            :name="wallet.icon ?? 'i-tabler-wallet'"
+            :name="item.icon ?? 'i-tabler-wallet'"
             class="flex-none size-5 text-primary"
           />
           <div class="flex flex-col space-y-0.5 px-1">
-            <p class="font-medium">{{ wallet.name }}</p>
+            <p class="font-medium">{{ item.name }}</p>
             <p
               :class="{
-                'text-red-500': wallet.balance < 0,
-                'dark:text-gray-400 text-gray-500': wallet.balance >= 0,
+                'text-red-500': item.balance < 0,
+                'dark:text-gray-400 text-gray-500': item.balance >= 0,
               }"
             >
-              {{ idrFormatter(wallet.balance) }}
+              {{ idrFormatter(item.balance) }}
             </p>
           </div>
         </template>
       </USelectMenu>
-    </UFormGroup>
+    </UFormField>
 
-    <UFormGroup label="Amount" name="amount" required>
-      <UInput
+    <UFormField label="Amount" name="amount" required>
+      <UInputNumber
         v-model="state.amount"
-        type="number"
         required
-        min="0"
-        :disabled="isLoading"
+        :min="0"
+        :format-options="{
+          style: 'currency',
+          currency: 'IDR',
+          currencyDisplay: 'narrowSymbol',
+          currencySign: 'standard',
+          maximumFractionDigits: 0,
+        }"
       />
-    </UFormGroup>
-    <UFormGroup label="Transfer at" name="transferAt" required>
+    </UFormField>
+    <UFormField label="Transfer at" name="transferAt" required>
       <UInput
         v-model="state.transferAt"
         type="date"
         required
         :disabled="isLoading"
       />
-    </UFormGroup>
-    <UFormGroup label="Note" name="note">
+    </UFormField>
+    <UFormField label="Note" name="note">
       <UTextarea
         v-model="state.note"
         :rows="5"
         autoresize
         placeholder="Explain about the transfer"
       />
-    </UFormGroup>
+    </UFormField>
     <UCheckbox v-model="state.withFee" name="withFee" label="Transfer Fee" />
-    <UFormGroup
+    <UFormField
       v-if="state.withFee"
       label="Fee Amount"
       name="feeAmount"
       required
     >
-      <UInput
+      <UInputNumber
         v-model="state.feeAmount"
-        type="number"
         required
-        min="0"
-        :disabled="isLoading"
+        :min="0"
+        :format-options="{
+          style: 'currency',
+          currency: 'IDR',
+          currencyDisplay: 'narrowSymbol',
+          currencySign: 'standard',
+          maximumFractionDigits: 0,
+        }"
       />
-    </UFormGroup>
+    </UFormField>
     <UButton
       type="submit"
       class="self-start"

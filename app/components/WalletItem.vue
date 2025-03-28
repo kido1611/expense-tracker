@@ -28,12 +28,12 @@ async function deleteWallet() {
   }
 }
 
-const dropdownItems = [
+const dropdownItems = ref([
   [
     {
       label: "Transfer",
       icon: "i-tabler-transfer",
-      click: () => {
+      onSelect() {
         emits("transfer", props.wallet.nanoid);
       },
     },
@@ -42,12 +42,12 @@ const dropdownItems = [
     {
       label: "Delete",
       icon: "i-tabler-trash",
-      click: () => {
+      onSelect() {
         deleteWallet();
       },
     },
   ],
-];
+]);
 </script>
 
 <template>
@@ -71,14 +71,22 @@ const dropdownItems = [
         </p>
       </div>
 
-      <UDropdown :items="dropdownItems" class="flex-none">
+      <UDropdownMenu
+        :items="dropdownItems"
+        class="flex-none"
+        :content="{
+          align: 'end',
+          side: 'bottom',
+        }"
+      >
         <UButton
-          color="white"
+          color="neutral"
+          variant="outline"
           square
           trailing-icon="i-tabler-dots-vertical"
-          size="sm"
+          size="md"
         />
-      </UDropdown>
+      </UDropdownMenu>
     </div>
   </div>
 </template>

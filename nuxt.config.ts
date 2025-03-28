@@ -16,6 +16,7 @@ export default defineNuxtConfig({
       openAPI: true,
     },
   },
+  css: ["~/assets/css/main.css"],
   runtimeConfig: {
     session: {
       maxAge: 60 * 60 * 24, // 2 Hours
