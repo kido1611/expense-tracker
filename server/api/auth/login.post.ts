@@ -1,30 +1,27 @@
-import { eq } from "drizzle-orm";
 import type { H3Event } from "h3";
 
 import { loginSchema } from "~/utils/zodSchema";
 
+import { getUserByEmail } from "~~/server/database/actions/users";
+
 export default defineEventHandler(async (event: H3Event) => {
   const validatedBody = await readValidatedBody(event, loginSchema.parse);
 
-  const [user] = await useDrizzle()
-    .select()
-    .from(tables.users)
-    .where(eq(tables.users.email, validatedBody.email))
-    .limit(1);
+  const user = await getUserByEmail(validatedBody.email);
 
   if (!user) {
     throw createError({
       status: 400,
-      message: "Account not found",
-      statusMessage: "Account not found",
+      message: "Incorrect credential",
+      statusMessage: "Bad Request",
     });
   }
 
   if (!(await verifyPassword(user.password, validatedBody.password))) {
     throw createError({
       status: 400,
-      message: "Account not found",
-      statusMessage: "Account not found",
+      message: "Incorrect credential",
+      statusMessage: "Bad Request",
     });
   }
 
@@ -37,6 +34,8 @@ export default defineEventHandler(async (event: H3Event) => {
   });
 
   return {
-    message: "success",
+    status: 200,
+    message: "Success",
+    statusMessage: "OK",
   };
 });
