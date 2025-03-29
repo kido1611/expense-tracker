@@ -231,7 +231,6 @@ async function onFileSelect(event: Event) {
         v-model="state.amount"
         required
         :min="0"
-        :max="selectedWallet?.balance"
         :format-options="{
           style: 'currency',
           currency: 'IDR',
