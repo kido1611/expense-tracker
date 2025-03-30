@@ -54,7 +54,7 @@ function useWalletTransfer() {
       >Logout</UButton
     >
 
-    <div class="flex flex-row flex-wrap gap-x-4 mt-8">
+    <div class="flex flex-row flex-wrap gap-4 mt-8">
       <WalletSlideover v-model:is-loading="isLoadingGlobal" />
       <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
       <WalletTransferSlideover
@@ -64,7 +64,7 @@ function useWalletTransfer() {
       />
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 py-8">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
       <IndexWalletList @transfer="openWalletTransfer" />
       <IndexTransactionList />
     </div>
