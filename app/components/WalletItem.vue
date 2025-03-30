@@ -18,8 +18,10 @@ async function deleteWallet() {
     });
 
     // TODO: Toast
-    await refreshNuxtData("latest-transactions");
-    await refreshNuxtData("wallets");
+    await refreshNuxtData([
+      INDEX_WALLETS_CACHE_KEY_NAME,
+      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+    ]);
   } catch (err) {
     console.log(err);
     // TODO: Toast

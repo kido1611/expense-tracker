@@ -2,7 +2,7 @@
 import type { Transaction } from "~/types";
 
 const { data, status } = await useFetch<Transaction[]>("/api/transactions", {
-  key: "latest-transactions",
+  key: INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
   query: {
     limit: 5,
   },

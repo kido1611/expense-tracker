@@ -4,7 +4,7 @@ const emit = defineEmits<{
 }>();
 
 const { data, status } = await useFetch("/api/wallets", {
-  key: "wallets",
+  key: INDEX_WALLETS_CACHE_KEY_NAME,
 });
 
 const openWalletTransfer = (walletNanoid: string) => {

@@ -16,8 +16,8 @@ const { isLoading, setLoading } = inject<LoadingGlobal>("loading-global", {
   setLoading: () => {},
 });
 
-const { data: walletsData } = useFetch("/api/wallets", {
-  key: "wallets",
+const { data: walletsData } = await useFetch("/api/wallets", {
+  key: INDEX_WALLETS_CACHE_KEY_NAME,
 });
 
 type Schema = z.output<typeof walletTransferSchema>;
@@ -90,7 +90,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     method: "POST",
     body: event.data,
   })
-    .then(() => {
+    .then(async () => {
       state.fromWalletNanoid = "";
       state.toWalletNanoid = "";
       state.amount = 0;
@@ -99,8 +99,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       state.withFee = false;
       state.feeAmount = 0;
 
-      refreshNuxtData("wallets");
-      refreshNuxtData("latest-transactions");
+      await refreshNuxtData([
+        INDEX_WALLETS_CACHE_KEY_NAME,
+        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+      ]);
 
       emit("close");
     })

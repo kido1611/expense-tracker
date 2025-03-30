@@ -89,18 +89,20 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     method: "POST",
     body: event.data,
   })
-    .then(() => {
+    .then(async () => {
       state.name = "";
       state.balance = 0;
       state.icon = "i-tabler-wallet";
 
-      refreshNuxtData("wallets");
-      refreshNuxtData("latest-transactions");
+      await refreshNuxtData([
+        INDEX_WALLETS_CACHE_KEY_NAME,
+        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+      ]);
 
       emit("close");
     })
-    .catch((_err) => {
-      // TODO: error on backend validation
+    .catch((err) => {
+      console.log(err);
     })
     .finally(() => {
       setLoading(false);

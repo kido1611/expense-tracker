@@ -8,10 +8,10 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { data: walletsData } = useFetch("/api/wallets", {
-  key: "wallets",
+const { data: walletsData } = await useFetch("/api/wallets", {
+  key: INDEX_WALLETS_CACHE_KEY_NAME,
 });
-const { data: categoriesData } = useFetch("/api/categories", {
+const { data: categoriesData } = await useFetch("/api/categories", {
   key: "categories",
 });
 
@@ -19,8 +19,7 @@ const { isLoading, setLoading } = inject<LoadingGlobal>("loading-global", {
   isLoading: false,
   setLoading: () => {},
 });
-const inputPhoto = useTemplateRef("inputPhotoRef");
-// const inputPhotoRef = ref<HTMLInputElement>();
+const inputPhoto = useTemplateRef<HTMLInputElement>("inputPhotoRef");
 
 type Schema = z.output<typeof transactionSchema>;
 const state = reactive({
@@ -52,12 +51,13 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       statePhoto.value = null;
 
       if (inputPhoto.value) {
-        // TODO: fix me to clear file input form field
-        // inputPhoto.value.value = "";
+        inputPhoto.value.value = "";
       }
 
-      refreshNuxtData("wallets");
-      refreshNuxtData("latest-transactions");
+      await refreshNuxtData([
+        INDEX_WALLETS_CACHE_KEY_NAME,
+        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+      ]);
 
       emit("close");
     })
