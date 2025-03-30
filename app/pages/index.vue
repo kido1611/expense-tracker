@@ -1,6 +1,4 @@
 <script setup lang="ts">
-import type { Wallet, Transaction } from "~/types";
-
 definePageMeta({
   middleware: "auth",
 });
@@ -21,19 +19,6 @@ const {
   selectedWallet: selectedWalletTransfer,
   open: openWalletTransfer,
 } = useWalletTransfer();
-
-const { data: walletsData } = await useFetch<Wallet[]>("/api/wallets", {
-  key: "wallets",
-});
-const { data: transactionsData } = await useFetch<Transaction[]>(
-  "/api/transactions",
-  {
-    key: "latest-transactions",
-    query: {
-      limit: 5,
-    },
-  },
-);
 
 async function logout() {
   await clear();
@@ -80,31 +65,8 @@ function useWalletTransfer() {
     </div>
 
     <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-8 py-8">
-      <div>
-        <div
-          v-if="walletsData ? walletsData.length > 0 : false"
-          class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
-        >
-          <WalletItem
-            v-for="wallet in walletsData"
-            :key="wallet.nanoid"
-            :wallet
-            @transfer="openWalletTransfer"
-          />
-        </div>
-      </div>
-      <div>
-        <div
-          v-if="transactionsData ? transactionsData.length > 0 : false"
-          class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
-        >
-          <TransactionItem
-            v-for="transaction in transactionsData"
-            :key="transaction.nanoid"
-            :transaction
-          />
-        </div>
-      </div>
+      <IndexWalletList @transfer="openWalletTransfer" />
+      <IndexTransactionList />
     </div>
   </UContainer>
 </template>
