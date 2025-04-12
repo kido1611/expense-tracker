@@ -1,56 +1,9 @@
-<script setup lang="ts">
-definePageMeta({
-  middleware: "auth",
-  layout: "dashboard",
-});
-
-const isLoadingGlobal = ref(false);
-function setLoadingGlobal(current: boolean) {
-  isLoadingGlobal.value = current;
-}
-provide(LoadingGlobalKey, {
-  isLoading: readonly(isLoadingGlobal),
-  setLoading: setLoadingGlobal,
-});
-
-const {
-  isSlideoverVisible: isWalletTransferSlideoverVisible,
-  selectedWallet: selectedWalletTransfer,
-  open: openWalletTransfer,
-} = useWalletTransfer();
-
-function useWalletTransfer() {
-  const isSlideoverVisible = ref<boolean>(false);
-  const selectedWallet = ref<string | null>(null);
-
-  function open(walletNanoid: string) {
-    isSlideoverVisible.value = true;
-    selectedWallet.value = walletNanoid;
-  }
-
-  return {
-    isSlideoverVisible,
-    selectedWallet,
-    open,
-  };
-}
-</script>
+<script setup lang="ts"></script>
 
 <template>
-  <UContainer>
-    <div class="flex flex-row flex-wrap gap-4 mt-8">
-      <WalletSlideover v-model:is-loading="isLoadingGlobal" />
-      <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
-      <WalletTransferSlideover
-        v-model:is-loading="isLoadingGlobal"
-        v-model:selected="selectedWalletTransfer"
-        v-model:is-visible="isWalletTransferSlideoverVisible"
-      />
-    </div>
-
-    <div class="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-6 py-8">
-      <IndexWalletList @transfer="openWalletTransfer" />
-      <IndexTransactionList />
-    </div>
-  </UContainer>
+  <div>
+    landing page
+    <NuxtLink to="/login">Login</NuxtLink>
+    <NuxtLink to="/dashboard">Dashboard</NuxtLink>
+  </div>
 </template>

@@ -7,27 +7,27 @@ const route = useRoute();
 const menu = [
   {
     title: "Home",
-    path: "/",
+    path: "/dashboard",
     icon: "i-tabler-layout-dashboard",
   },
   {
     title: "Wallets",
-    path: "/wallets",
+    path: "/dashboard/wallets",
     icon: "i-tabler-wallet",
   },
   {
     title: "Transactions",
-    path: "/transactions",
+    path: "/dashboard/transactions",
     icon: "i-tabler-arrows-transfer-down",
   },
   {
     title: "Categories",
-    path: "/categories",
+    path: "/dashboard/categories",
     icon: "i-tabler-category",
   },
   {
     title: "Budgets",
-    path: "/budgets",
+    path: "/dashboard/budgets",
     icon: "i-tabler-pig",
   },
 ];
@@ -102,7 +102,14 @@ const userMenu: DropdownMenuItem[][] = [
                 </button>
               </UDropdownMenu>
             </template>
-            <div v-else>guest</div>
+            <NuxtLink
+              v-else
+              to="/login"
+              class="h-10 hover:bg-neutral-700 rounded-md flex flex-col justify-center px-2 w-full text-left text-sm"
+            >
+              <p class="font-medium">Guest</p>
+              <p class="text-neutral-400 text-xs">Login now</p>
+            </NuxtLink>
           </div>
         </div>
       </div>

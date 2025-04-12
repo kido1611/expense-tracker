@@ -32,7 +32,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       });
 
       await refreshSession();
-      await navigateTo("/");
+      await navigateTo("/dashboard");
     })
     .catch(() => {
       toast.add({
