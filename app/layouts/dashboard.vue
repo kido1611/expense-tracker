@@ -40,6 +40,11 @@ const userMenu: DropdownMenuItem[][] = [
       async onSelect() {
         await clear();
 
+        clearNuxtData([
+          INDEX_WALLETS_CACHE_KEY_NAME,
+          INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+        ]);
+
         await navigateTo("/login");
       },
     },
