@@ -15,7 +15,7 @@ const open = ref<boolean>(false);
   >
     <UButton type="button" icon="i-tabler-plus">Add Transaction</UButton>
     <template #body>
-      <TransactionForm @close="open = false" />
+      <LazyTransactionForm hydrate-on-visible @close="open = false" />
     </template>
   </USlideover>
 </template>
