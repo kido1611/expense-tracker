@@ -15,13 +15,13 @@
   },
   "dependencies": {
     "@iconify-json/tabler": "^1.2.17",
-    "@nuxt/ui": "^3.0.1",
-    "@nuxthub/core": "^0.8.21",
+    "@nuxt/ui": "^3.0.2",
+    "@nuxthub/core": "^0.8.24",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.36.4",
     "nanoid": "^5.1.5",
     "nuxt": "^3.16.2",
-    "nuxt-auth-utils": "^0.5.17",
+    "nuxt-auth-utils": "^0.5.19",
     "uuid": "^11.1.0",
     "vue": "^3.5.13",
     "vue-router": "^4.5.0",
@@ -33,8 +33,8 @@
     "@iconify-json/hugeicons": "^1.2.4",
     "@nuxt/eslint": "^0.6.2",
     "drizzle-kit": "^0.28.1",
-    "eslint": "^9.23.0",
-    "typescript": "^5.8.2",
-    "wrangler": "^3.114.3"
+    "eslint": "^9.24.0",
+    "typescript": "^5.8.3",
+    "wrangler": "^3.114.5"
   }
 }
