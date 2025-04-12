@@ -1,16 +1,15 @@
 <script setup lang="ts">
 definePageMeta({
   middleware: "auth",
+  layout: "dashboard",
 });
-
-const { user, loggedIn, clear } = useUserSession();
 
 const isLoadingGlobal = ref(false);
 function setLoadingGlobal(current: boolean) {
   isLoadingGlobal.value = current;
 }
-provide("loading-global", {
-  isLoading: isLoadingGlobal,
+provide(LoadingGlobalKey, {
+  isLoading: readonly(isLoadingGlobal),
   setLoading: setLoadingGlobal,
 });
 
@@ -19,12 +18,6 @@ const {
   selectedWallet: selectedWalletTransfer,
   open: openWalletTransfer,
 } = useWalletTransfer();
-
-async function logout() {
-  await clear();
-
-  navigateTo("/login");
-}
 
 function useWalletTransfer() {
   const isSlideoverVisible = ref<boolean>(false);
@@ -45,15 +38,6 @@ function useWalletTransfer() {
 
 <template>
   <UContainer>
-    <p>
-      {{ loggedIn }}
-      {{ user }}
-    </p>
-
-    <UButton type="button" icon="i-tabler-logout" @click="logout"
-      >Logout</UButton
-    >
-
     <div class="flex flex-row flex-wrap gap-4 mt-8">
       <WalletSlideover v-model:is-loading="isLoadingGlobal" />
       <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
@@ -64,7 +48,7 @@ function useWalletTransfer() {
       />
     </div>
 
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-6 py-8">
+    <div class="grid grid-cols-[repeat(auto-fit,minmax(400px,1fr))] gap-6 py-8">
       <IndexWalletList @transfer="openWalletTransfer" />
       <IndexTransactionList />
     </div>

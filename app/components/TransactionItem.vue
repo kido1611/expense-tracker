@@ -34,8 +34,10 @@ async function deleteTransaction() {
     });
 
     // TODO: Toast
-    await refreshNuxtData("latest-transactions");
-    await refreshNuxtData("wallets");
+    await refreshNuxtData([
+      INDEX_WALLETS_CACHE_KEY_NAME,
+      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+    ]);
   } catch (err) {
     // TODO: Toast
     console.log(err);
@@ -44,17 +46,18 @@ async function deleteTransaction() {
   }
 }
 
-const dropdownItems = ref([
+const dropdownItems = [
   [
     {
       label: "Delete",
       icon: "i-tabler-trash",
+      color: "error",
       onSelect() {
         deleteTransaction();
       },
     },
   ],
-]);
+];
 </script>
 
 <template>

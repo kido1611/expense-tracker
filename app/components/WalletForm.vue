@@ -7,8 +7,8 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { isLoading, setLoading } = inject<LoadingGlobal>("loading-global", {
-  isLoading: false,
+const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
+  isLoading: ref(false),
   setLoading: () => {},
 });
 

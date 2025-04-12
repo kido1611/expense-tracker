@@ -1,2 +1,8 @@
 @import "tailwindcss" theme(static);
 @import "@nuxt/ui";
+
+@theme {
+  --dashboard-sidebar-width: 278px;
+  --dashboard-layout: var(--dashboard-sidebar-width) minmax(400px, 1fr);
+  --dashboard-sidebar-layout: auto 1fr auto;
+}

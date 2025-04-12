@@ -3,7 +3,7 @@ const emit = defineEmits<{
   transfer: [walletNanoid: string];
 }>();
 
-const { data, status } = await useFetch("/api/wallets", {
+const { data, status } = useFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
 });
 
@@ -13,10 +13,21 @@ const openWalletTransfer = (walletNanoid: string) => {
 </script>
 
 <template>
-  <div>
-    <h2>Wallets</h2>
+  <div class="relative">
+    <!-- <UProgress -->
+    <!--   v-if="status == 'pending' && (!data || (data && data.length > 0))" -->
+    <!--   animation="swing" -->
+    <!--   size="xs" -->
+    <!--   class="absolute top-0 w-full" -->
+    <!-- /> -->
+    <h2 class="text-lg font-medium mb-4">Wallets</h2>
 
-    <div>{{ status }}</div>
+    <div
+      v-if="status == 'pending' && data && data.length === 0"
+      class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
+    >
+      <LazyWalletItemSkeleton v-for="i in 5" :key="i" />
+    </div>
     <div
       v-if="data ? data.length > 0 : false"
       class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
@@ -28,6 +39,7 @@ const openWalletTransfer = (walletNanoid: string) => {
         @transfer="openWalletTransfer"
       />
     </div>
-    <div v-else class="text-center py-8 text-neutral-400">Wallet is empty</div>
+
+    <div v-else class="text-center py-16 text-neutral-400">Wallet is empty</div>
   </div>
 </template>

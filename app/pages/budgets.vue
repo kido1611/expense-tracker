@@ -6,5 +6,5 @@ definePageMeta({
 </script>
 
 <template>
-  <h1>Categories</h1>
+  <h1>Budgets</h1>
 </template>

@@ -30,7 +30,7 @@ async function deleteWallet() {
   }
 }
 
-const dropdownItems = ref([
+const dropdownItems = [
   [
     {
       label: "Transfer",
@@ -39,17 +39,25 @@ const dropdownItems = ref([
         emits("transfer", props.wallet.nanoid);
       },
     },
+    {
+      label: "Adjust Balance",
+      icon: "i-tabler-cash-banknote-edit",
+      onSelect() {
+        // TODO
+      },
+    },
   ],
   [
     {
       label: "Delete",
       icon: "i-tabler-trash",
+      color: "error",
       onSelect() {
         deleteWallet();
       },
     },
   ],
-]);
+];
 </script>
 
 <template>

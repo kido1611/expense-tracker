@@ -1,4 +1,6 @@
 export interface LoadingGlobal {
-  isLoading: boolean,
-  setLoading: (state: boolean) => void
+  isLoading: Ref<boolean>;
+  setLoading: (state: boolean) => void;
 }
+
+export const LoadingGlobalKey = Symbol() as InjectionKey<LoadingGlobal>;

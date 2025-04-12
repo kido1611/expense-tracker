@@ -11,12 +11,12 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { isLoading, setLoading } = inject<LoadingGlobal>("loading-global", {
-  isLoading: false,
+const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
+  isLoading: ref(false),
   setLoading: () => {},
 });
 
-const { data: walletsData } = await useFetch("/api/wallets", {
+const { data: walletsData } = useFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
 });
 
