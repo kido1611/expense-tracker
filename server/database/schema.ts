@@ -48,6 +48,9 @@ export const wallets = sqliteTable(
       .notNull()
       .default(sql`(CURRENT_TIMESTAMP)`)
       .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    disabledAt: text("disabled_at"),
+    // enable soft-delete, used in ledger table
+    deletedAt: text("deleted_at"),
   },
   (table) => {
     return {
@@ -58,6 +61,31 @@ export const wallets = sqliteTable(
         columns: [table.userId],
         foreignColumns: [users.id],
         name: "wallets_user_id_foreign",
+      }).onDelete("cascade"),
+    };
+  },
+);
+
+export const budgets = sqliteTable(
+  "budgets",
+  {
+    id: integer("id").primaryKey({ autoIncrement: true }),
+    userId: integer("user_id").notNull(),
+    amount: integer("amount").notNull().default(0),
+    createdAt: text("created_at")
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`),
+    updatedAt: text("updated_at")
+      .notNull()
+      .default(sql`(CURRENT_TIMESTAMP)`)
+      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+  },
+  (table) => {
+    return {
+      userReference: foreignKey({
+        columns: [table.userId],
+        foreignColumns: [users.id],
+        name: "budgets_user_id_foreign",
       }).onDelete("cascade"),
     };
   },
@@ -101,6 +129,7 @@ export const transactions = sqliteTable(
     userId: integer("user_id").notNull(),
     walletId: integer("wallet_id").notNull(),
     categoryId: integer("category_id").notNull(),
+    budgetId: integer("budget_id"),
 
     nanoid: text("nanoid").notNull().unique(),
     //  store absoslute amount
@@ -109,7 +138,7 @@ export const transactions = sqliteTable(
     realAmount: integer("real_amount").notNull().default(0),
     imagePath: text("image_path"),
     note: text("note"),
-    // form has option to hide transaction from report
+    // form has option to hide transaction from report. Used on transfer balance between wallet
     isVisibleInReport: integer("is_visible_in_report", {
       mode: "boolean",
     }).default(true),
@@ -144,6 +173,11 @@ export const transactions = sqliteTable(
         foreignColumns: [categories.id],
         name: "transactions_category_id_foreign",
       }).onDelete("cascade"),
+      budgetReference: foreignKey({
+        columns: [table.budgetId],
+        foreignColumns: [budgets.id],
+        name: "transactions_budget_id_foreign",
+      }).onDelete("set null"),
     };
   },
 );
