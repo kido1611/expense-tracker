@@ -7,7 +7,7 @@ export const TransactionCreateSchema = z.object({
   categoryId: z.uuid(),
   amount: z.coerce.number(),
   note: z.string().max(200).nullish(),
-  spendAt: z.date(),
+  spendAt: z.iso.date(),
   isVisibleInReport: z.boolean().default(true),
 });
 
@@ -15,6 +15,7 @@ export type TransactionCreate = z.output<typeof TransactionCreateSchema>;
 
 export type TransactionInsert = TransactionCreate & {
   userId: string;
+  spendAt: Date;
 };
 
 export type TransactionResponse = {

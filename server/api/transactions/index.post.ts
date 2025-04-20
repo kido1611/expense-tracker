@@ -1,4 +1,5 @@
 import type { H3Event } from "h3";
+import { parseISO } from "date-fns";
 import { ensureUserIsAvailable } from "~~/server/utils/session";
 
 import {
@@ -40,8 +41,10 @@ export default defineEventHandler(
       });
     }
 
+    const spendDate = parseISO(validatedBody.spendAt);
     const result = await createUserTransaction({
       ...validatedBody,
+      spendAt: spendDate,
       userId: user.id,
     });
 
