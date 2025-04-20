@@ -1,41 +1,38 @@
 import type { H3Event } from "h3";
 
-import { loginSchema } from "~/utils/zodSchema";
+import { getUserByEmail } from "~~/server/database/actions/user";
 
-import { getUserByEmail } from "~~/server/database/actions/users";
+export default defineEventHandler(
+  async (event: H3Event): Promise<ApiResponse<undefined>> => {
+    const validatedBody = await readValidatedBody(event, UserLoginSchema.parse);
 
-export default defineEventHandler(async (event: H3Event) => {
-  const validatedBody = await readValidatedBody(event, loginSchema.parse);
+    const user = await getUserByEmail(validatedBody.email);
 
-  const user = await getUserByEmail(validatedBody.email);
+    if (!user) {
+      throw createError({
+        ...httpStatusMessage[401],
+        message: "Incorrect credential",
+      });
+    }
 
-  if (!user) {
-    throw createError({
-      status: 400,
-      message: "Incorrect credential",
-      statusMessage: "Bad Request",
+    if (!(await verifyPassword(user.password, validatedBody.password))) {
+      throw createError({
+        ...httpStatusMessage[401],
+        message: "Incorrect credential",
+      });
+    }
+
+    await setUserSession(event, {
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+      },
     });
-  }
 
-  if (!(await verifyPassword(user.password, validatedBody.password))) {
-    throw createError({
-      status: 400,
-      message: "Incorrect credential",
-      statusMessage: "Bad Request",
-    });
-  }
-
-  await setUserSession(event, {
-    user: {
-      id: user.id,
-      uuid: user.uuid,
-      name: user.name,
-    },
-  });
-
-  return {
-    status: 200,
-    message: "Success",
-    statusMessage: "OK",
-  };
-});
+    return {
+      error: false,
+      ...httpStatusMessage[200],
+    };
+  },
+);

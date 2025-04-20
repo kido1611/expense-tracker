@@ -1,15 +1,14 @@
 import type { H3Event } from "h3";
 import { v4 as uuidv4 } from "uuid";
-import { transactionRouteParamSchema } from "~/utils/zodSchema";
 import {
-  deleteTransactionImage,
-  getUserTransactionByNanoid,
-} from "~~/server/utils/transaction";
+  getUserTransactionById,
+  updateTransactionImageById,
+} from "~~/server/database/actions";
 
 export default defineEventHandler(async (event: H3Event) => {
   const validatedParams = await getValidatedRouterParams(
     event,
-    transactionRouteParamSchema.parse,
+    TransactionRouteParamSchema.parse,
   );
 
   /**
@@ -19,10 +18,11 @@ export default defineEventHandler(async (event: H3Event) => {
   const file = form.get("image") as File;
 
   if (!file || file.size === 0) {
-    throw createError({
-      statusCode: 400,
+    setResponseStatus(event, 400);
+    return {
+      status: "error",
       message: "No image provided",
-    });
+    };
   }
 
   ensureBlob(file, {
@@ -36,10 +36,14 @@ export default defineEventHandler(async (event: H3Event) => {
   /**
    * Get transaction
    */
-  const transaction = await getUserTransactionByNanoid(
-    user.id,
-    validatedParams.nanoid,
-  );
+  const transaction = await getUserTransactionById(user.id, validatedParams.id);
+  if (!transaction) {
+    setResponseStatus(event, 404);
+    return {
+      status: "error",
+      message: "Transaction is missing",
+    };
+  }
 
   /**
    * Upload image file
@@ -50,31 +54,18 @@ export default defineEventHandler(async (event: H3Event) => {
   const fileName = uuidv4() + "." + extension;
 
   const path = await hubBlob().put(fileName, file, {
-    prefix: `transactions/${transaction.nanoid}/`,
+    prefix: `transactions/${transaction.id}/`,
   });
 
   /**
    * Delete old transaction image if exist
    */
-  await deleteTransactionImage(transaction);
+  await deleteImage(transaction?.imagePath);
 
   /**
    * Update image_path in transaction
    */
-  await useDrizzle()
-    .update(tables.transactions)
-    .set({
-      imagePath: path.pathname,
-    })
-    .where(eq(tables.transactions.id, transaction.id));
+  await updateTransactionImageById(transaction.id, path.pathname);
 
-  return {
-    nanoid: transaction.nanoid,
-    amount: transaction.amount,
-    note: transaction.note,
-    image_path: path,
-    spend_at: transaction.spendAt,
-    is_visible_in_report: transaction.isVisibleInReport,
-    created_at: transaction.createdAt,
-  };
+  setResponseStatus(event, 204);
 });

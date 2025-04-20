@@ -1,6 +1,5 @@
-import type { z } from "zod";
-
 import { v7 as uuidv7 } from "uuid";
+import { eq, and } from "drizzle-orm";
 
 export async function getUsersByEmail(email: string) {
   const users = await useDrizzle()
@@ -12,16 +11,20 @@ export async function getUsersByEmail(email: string) {
 }
 
 export async function getUserByEmail(email: string) {
-  const [user] = await useDrizzle()
-    .select()
-    .from(tables.users)
-    .where(eq(tables.users.email, email))
-    .limit(1);
+  const user = await useDrizzle().query.users.findFirst({
+    where: and(eq(tables.users.email, email)),
+  });
 
   return user;
 }
 
-type UserCreate = z.output<typeof authRegisterSchema>;
+export async function getUserById(id: string) {
+  const user = await useDrizzle().query.users.findFirst({
+    where: and(eq(tables.users.id, id)),
+  });
+
+  return user;
+}
 
 export async function createUser(data: UserCreate) {
   const [user] = await useDrizzle()
@@ -29,7 +32,7 @@ export async function createUser(data: UserCreate) {
     .values([
       {
         name: data.name,
-        uuid: uuidv7(),
+        id: uuidv7(),
         email: data.email,
         password: await hashPassword(data.password),
       },

@@ -1,144 +1,160 @@
+import { parseISO } from "date-fns";
 import type { H3Event } from "h3";
-import { walletTransferSchema } from "~/utils/zodSchema";
-import { nanoid } from "nanoid";
-import { getUserWalletByNanoid } from "~~/server/utils/wallet";
-import { getUserCategoryBykey } from "~~/server/utils/category";
 
-export default defineEventHandler(async (event: H3Event) => {
-  const validatedBody = await readValidatedBody(
-    event,
-    walletTransferSchema.parse,
-  );
+import {
+  getUserWalletById,
+  getUserCategoryByKey,
+  createUserTransactions,
+  updateUserWalletBalance,
+} from "~~/server/database/actions";
 
-  // Check user session
-  const session = await requireUserSession(event);
-  const user = await ensureUserIsAvailable(event, session);
-
-  // Get Source Wallet
-  const fromWallet = await getUserWalletByNanoid(
-    user.id,
-    validatedBody.fromWalletNanoid,
-  );
-
-  // Get Target Wallet
-  const toWallet = await getUserWalletByNanoid(
-    user.id,
-    validatedBody.toWalletNanoid,
-  );
-
-  // Get outcome transfer category
-  const outcomeTransferCategory = await getUserCategoryBykey(
-    user.id,
-    "expense_transfer",
-  );
-
-  // Get income transfer category
-  const incomeTransferCategory = await getUserCategoryBykey(
-    user.id,
-    "income_transfer",
-  );
-
-  const transactions = [
-    {
-      userId: user.id,
-      walletId: fromWallet.id,
-      categoryId: outcomeTransferCategory.id,
-      nanoid: nanoid(),
-      amount: validatedBody.amount,
-      realAmount: validatedBody.amount * -1,
-      isVisibleInReport: false,
-      spendAt: validatedBody.transferAt,
-      note: validatedBody.note,
-    },
-    {
-      userId: user.id,
-      walletId: toWallet.id,
-      categoryId: incomeTransferCategory.id,
-      nanoid: nanoid(),
-      amount: validatedBody.amount,
-      realAmount: validatedBody.amount,
-      isVisibleInReport: false,
-      spendAt: validatedBody.transferAt,
-      note: validatedBody.note,
-    },
-  ];
-
-  if (validatedBody.withFee && validatedBody.feeAmount > 0) {
-    // Get category for fee
-    const otherTransferCategory = await getUserCategoryBykey(
-      user.id,
-      "expense_other",
+export default defineEventHandler(
+  async (event: H3Event): Promise<ApiResponse<undefined>> => {
+    const validatedBody = await readValidatedBody(
+      event,
+      WalletTransferCreateSchema.parse,
     );
 
-    transactions.push({
-      userId: user.id,
-      walletId: fromWallet.id,
-      categoryId: otherTransferCategory.id,
-      nanoid: nanoid(),
-      amount: validatedBody.feeAmount,
-      realAmount: validatedBody.feeAmount * -1,
-      isVisibleInReport: true,
-      spendAt: validatedBody.transferAt,
-      note: "Transfer Fee",
-    });
-  }
+    // Check user session
+    const session = await requireUserSession(event);
+    const user = await ensureUserIsAvailable(event, session);
 
-  const insertResults = await useDrizzle()
-    .insert(tables.transactions)
-    .values(transactions)
-    .returning();
+    // Get Source Wallet
+    const fromWallet = await getUserWalletById(
+      user.id,
+      validatedBody.fromWalletId,
+    );
 
-  const transactionOutcome = insertResults.filter(
-    (data) => data.realAmount === validatedBody.amount * -1,
-  )[0];
-  const transactionIncome = insertResults.filter(
-    (data) => data.realAmount === validatedBody.amount,
-  )[0];
-  const transactionFee = insertResults.filter(
-    (data) =>
-      validatedBody.withFee && data.realAmount === validatedBody.feeAmount * -1,
-  )[0];
+    if (!fromWallet) {
+      throw createError({
+        ...httpStatusMessage[400],
+        message: "Wallet source is missing",
+      });
+    }
 
-  await useDrizzle()
-    .insert(tables.walletTransfers)
-    .values({
-      sourceWalletId: fromWallet.id,
-      sourceTransactionId: transactionOutcome?.id,
-      targetWalletId: toWallet.id,
-      targetTransactionId: transactionIncome?.id,
-      feeTransactionId: transactionFee ? transactionFee.id : null,
-    });
+    // Get Target Wallet
+    const toWallet = await getUserWalletById(user.id, validatedBody.toWalletId);
 
-  // Update balance of source wallet
-  await useDrizzle()
-    .update(tables.wallets)
-    .set({
-      balance:
-        fromWallet.balance -
+    if (!toWallet) {
+      throw createError({
+        ...httpStatusMessage[400],
+        message: "Wallet target is missing",
+      });
+    }
+
+    // Get outcome transfer category
+    const outcomeTransferCategory = await getUserCategoryByKey(
+      user.id,
+      "expense_transfer",
+    );
+
+    if (!outcomeTransferCategory) {
+      throw createError({
+        ...httpStatusMessage[400],
+        message: "Category expense is missing",
+      });
+    }
+
+    // Get income transfer category
+    const incomeTransferCategory = await getUserCategoryByKey(
+      user.id,
+      "income_transfer",
+    );
+
+    if (!incomeTransferCategory) {
+      throw createError({
+        ...httpStatusMessage[400],
+        message: "Category income is missing",
+      });
+    }
+
+    const transferDate = parseISO(validatedBody.transferAt);
+
+    const transactions = [
+      {
+        userId: user.id,
+        walletId: fromWallet.id,
+        categoryId: outcomeTransferCategory.id,
+        amount: validatedBody.amount * -1,
+        isVisibleInReport: false,
+        spendAt: transferDate,
+        note: validatedBody.note,
+      },
+      {
+        userId: user.id,
+        walletId: toWallet.id,
+        categoryId: incomeTransferCategory.id,
+        amount: validatedBody.amount,
+        isVisibleInReport: false,
+        spendAt: transferDate,
+        note: validatedBody.note,
+      },
+    ];
+
+    if (validatedBody.withFee && validatedBody.feeAmount > 0) {
+      // Get category for fee
+      const otherTransferCategory = await getUserCategoryByKey(
+        user.id,
+        "expense_other",
+      );
+
+      if (otherTransferCategory) {
+        transactions.push({
+          userId: user.id,
+          walletId: fromWallet.id,
+          categoryId: otherTransferCategory.id,
+          amount: validatedBody.feeAmount * -1,
+          isVisibleInReport: true,
+          spendAt: transferDate,
+          note: "Transfer Fee",
+        });
+      }
+    }
+
+    const insertResults = await createUserTransactions(transactions);
+
+    const transactionOutcome = insertResults.filter(
+      (data) => data.amount === validatedBody.amount * -1,
+    )[0];
+    const transactionIncome = insertResults.filter(
+      (data) => data.amount === validatedBody.amount,
+    )[0];
+    const transactionFee = insertResults.filter(
+      (data) =>
+        validatedBody.withFee && data.amount === validatedBody.feeAmount * -1,
+    )[0];
+
+    await useDrizzle()
+      .insert(tables.walletTransfers)
+      .values({
+        sourceTransactionId: transactionOutcome.id,
+        targetTransactionId: transactionIncome.id,
+        feeTransactionId: transactionFee ? transactionFee.id : null,
+      });
+
+    // Update balance of source wallet
+    await updateUserWalletBalance(
+      user.id,
+      fromWallet.id,
+      fromWallet.balance -
         validatedBody.amount -
         (validatedBody.withFee && validatedBody.feeAmount > 0
           ? validatedBody.feeAmount
           : 0),
-    })
-    .where(eq(tables.wallets.id, fromWallet.id));
+    );
 
-  // Update balance of target wallet
-  await useDrizzle()
-    .update(tables.wallets)
-    .set({
-      balance: toWallet.balance + validatedBody.amount,
-    })
-    .where(eq(tables.wallets.id, toWallet.id));
+    // Update balance of target wallet
+    await updateUserWalletBalance(
+      user.id,
+      toWallet.id,
+      toWallet.balance + validatedBody.amount,
+    );
 
-  return {
-    user,
-    validatedBody,
-    fromWallet,
-    insertResults,
-    transactions: {
-      transactionOutcome,
-      transactionIncome,
-      transactionFee,
-    },
-  };
-});
+    setResponseStatus(event, 201);
+
+    return {
+      error: false,
+      ...httpStatusMessage[201],
+    };
+  },
+);

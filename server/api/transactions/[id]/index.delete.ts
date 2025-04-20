@@ -1,37 +1,40 @@
 import type { H3Event } from "h3";
 import { eq, and, inArray } from "drizzle-orm";
-import { transactionRouteParamSchema } from "~/utils/zodSchema";
 import {
-  deleteTransactionImage,
-  getUserTransactionByNanoid,
-} from "~~/server/utils/transaction";
-import { getWalletTransferByTransactionId } from "~~/server/utils/walletTransfer";
+  getUserTransactionById,
+  getWalletTransferByTransactionId,
+} from "~~/server/database/actions";
 
 export default defineEventHandler(async (event: H3Event) => {
   const validatedParams = await getValidatedRouterParams(
     event,
-    transactionRouteParamSchema.parse,
+    TransactionRouteParamSchema.parse,
   );
 
   const session = await requireUserSession(event);
   const user = await ensureUserIsAvailable(event, session);
 
-  const transaction = await getUserTransactionByNanoid(
-    user.id,
-    validatedParams.nanoid,
-  );
+  const transaction = await getUserTransactionById(user.id, validatedParams.id);
+
+  if (!transaction) {
+    setResponseStatus(event, 404);
+    return {
+      status: "error",
+      message: "Transaction is missing",
+    };
+  }
 
   const walletTransfer = await getWalletTransferByTransactionId(transaction.id);
 
   const deleteTransactions = [];
-  const updateWallets = new Map<number, number>();
+  const updateWallets = new Map<string, number>();
 
   if (!walletTransfer) {
     deleteTransactions.push(transaction.id);
 
-    updateWallets.set(transaction.walletId, transaction.realAmount * -1);
+    updateWallets.set(transaction.walletId, transaction.amount * -1);
 
-    await deleteTransactionImage(transaction);
+    await deleteImage(transaction.imagePath);
   } else {
     const transactionIds = [
       walletTransfer.sourceTransactionId,
@@ -52,7 +55,7 @@ export default defineEventHandler(async (event: H3Event) => {
       deleteTransactions.push(item.id);
       updateWallets.set(
         item.walletId,
-        (updateWallets.get(item.walletId) ?? 0) - item.realAmount,
+        (updateWallets.get(item.walletId) ?? 0) - item.amount,
       );
     });
 
@@ -94,13 +97,5 @@ export default defineEventHandler(async (event: H3Event) => {
       );
   });
 
-  return {
-    nanoid: transaction.nanoid,
-    amount: transaction.amount,
-    note: transaction.note,
-    image_path: transaction.imagePath,
-    spend_at: transaction.spendAt,
-    is_visible_in_report: transaction.isVisibleInReport,
-    created_at: transaction.createdAt,
-  };
+  setResponseStatus(event, 204);
 });

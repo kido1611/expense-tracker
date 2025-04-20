@@ -1,30 +1,29 @@
 import type { H3Event } from "h3";
 
-import { getUsersByEmail, createUser } from "~~/server/database/actions/users";
+import { getUsersByEmail, createUser } from "~~/server/database/actions/user";
 
-export default defineEventHandler(async (event: H3Event) => {
-  const validatedBody = await readValidatedBody(
-    event,
-    authRegisterSchema.parse,
-  );
+export default defineEventHandler(
+  async (event: H3Event): Promise<ApiResponse<undefined>> => {
+    const validatedBody = await readValidatedBody(
+      event,
+      UserCreateSchema.parse,
+    );
 
-  const users = await getUsersByEmail(validatedBody.email);
+    const users = await getUsersByEmail(validatedBody.email);
 
-  if (users.length > 0) {
-    throw createError({
-      status: 409,
-      message: "Email already registered",
-      statusMessage: "Conflict",
-    });
-  }
+    if (users.length > 0) {
+      throw createError({
+        ...httpStatusMessage[409],
+        message: "Email already registered",
+      });
+    }
 
-  const user = await createUser(validatedBody);
+    await createUser(validatedBody);
 
-  setResponseStatus(event, 201);
-  return {
-    status: 201,
-    message: "Success",
-    statusMessage: "Created",
-    data: user,
-  };
-});
+    setResponseStatus(event, 201);
+    return {
+      error: false,
+      ...httpStatusMessage[201],
+    };
+  },
+);

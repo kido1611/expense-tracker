@@ -1,20 +1,18 @@
 import type { H3Event } from "h3";
-import { eq, asc, desc } from "drizzle-orm";
 
-export default defineEventHandler(async (event: H3Event) => {
-  const session = await requireUserSession(event);
-  const user = await ensureUserIsAvailable(event, session);
+import { getUserCategories } from "~~/server/database/actions";
 
-  const categories = await useDrizzle()
-    .select({
-      id: tables.categories.id,
-      name: tables.categories.name,
-      is_expense: tables.categories.isExpense,
-      created_at: tables.categories.createdAt,
-    })
-    .from(tables.categories)
-    .where(eq(tables.categories.userId, user.id))
-    .orderBy(desc(tables.categories.isExpense), asc(tables.categories.name));
+export default defineEventHandler(
+  async (event: H3Event): Promise<ApiResponse<CategoryResponse[]>> => {
+    const session = await requireUserSession(event);
+    const user = await ensureUserIsAvailable(event, session);
 
-  return categories;
-});
+    const categories = await getUserCategories(user.id);
+
+    return {
+      error: false,
+      ...httpStatusMessage[200],
+      data: categories,
+    };
+  },
+);
