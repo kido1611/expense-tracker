@@ -1,8 +1,6 @@
 <script setup lang="ts">
-import type { Wallet } from "~/types";
-
 const props = defineProps<{
-  wallet: Wallet;
+  wallet: WalletResponse;
 }>();
 
 const emits = defineEmits<{
@@ -13,7 +11,7 @@ const isDeleteLoading = ref<boolean>(false);
 async function deleteWallet() {
   isDeleteLoading.value = true;
   try {
-    await $fetch(`/api/wallets/${props.wallet.nanoid}`, {
+    await $fetch(`/api/wallets/${props.wallet.id}`, {
       method: "DELETE",
     });
 
@@ -36,7 +34,7 @@ const dropdownItems = [
       label: "Transfer",
       icon: "i-tabler-transfer",
       onSelect() {
-        emits("transfer", props.wallet.nanoid);
+        emits("transfer", props.wallet.id);
       },
     },
     {
@@ -62,13 +60,16 @@ const dropdownItems = [
 
 <template>
   <div class="px-4 py-3">
-    <div class="flex flex-row items-center justify-betbween space-x-4">
+    <div class="justify-betbween flex flex-row items-center space-x-4">
       <div
-        class="size-9 flex items-center justify-center bg-primary-400 text-gray-900 rounded-full flex-none"
+        class="flex size-9 flex-none items-center justify-center rounded-full bg-primary-400 text-gray-900"
       >
-        <UIcon :name="wallet.icon ?? 'i-tabler-wallet'" class="size-5" />
+        <UIcon
+          :name="wallet.icon ?? 'i-tabler-wallet'"
+          class="size-5"
+        />
       </div>
-      <div class="flex flex-col space-y-0.5 flex-1">
+      <div class="flex flex-1 flex-col space-y-0.5">
         <p class="font-semibold">{{ wallet.name }}</p>
         <p
           class="text-sm"

@@ -3,8 +3,12 @@ const emit = defineEmits<{
   transfer: [walletNanoid: string];
 }>();
 
-const { data, status } = useFetch("/api/wallets", {
+const { data, status } = await useLazyFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
+  deep: false,
+  transform: (value) => {
+    return value.data;
+  },
 });
 
 const isSkeletonVisible = computed(() => {
@@ -14,43 +18,43 @@ const isSkeletonVisible = computed(() => {
   );
 });
 
-const openWalletTransfer = (walletNanoid: string) => {
-  emit("transfer", walletNanoid);
+const openWalletTransfer = (walletId: string) => {
+  emit("transfer", walletId);
 };
 </script>
 
 <template>
   <div class="relative">
-    <!-- <UProgress -->
-    <!--   v-if="status == 'pending' && (!data || (data && data.length > 0))" -->
-    <!--   animation="swing" -->
-    <!--   size="xs" -->
-    <!--   class="absolute top-0 w-full" -->
-    <!-- /> -->
-    <h2 class="text-lg font-medium mb-4">Wallets</h2>
+    <h2 class="mb-4 text-lg font-medium">Wallets</h2>
 
     <template v-if="isSkeletonVisible">
       <div
-        class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
+        class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
       >
-        <LazyWalletItemSkeleton v-for="i in 5" :key="i" />
+        <LazyWalletItemSkeleton
+          v-for="i in 5"
+          :key="i"
+        />
       </div>
     </template>
 
     <template v-else>
       <div
-        v-if="data ? data.length > 0 : false"
-        class="grid grid-cols-1 border border-neutral-700 divide-y divide-neutral-700 rounded-lg overflow-hidden bg-neutral-900"
+        v-if="data && data.length > 0"
+        class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
       >
         <WalletItem
           v-for="wallet in data"
-          :key="wallet.nanoid"
+          :key="wallet.id"
           :wallet="wallet"
           @transfer="openWalletTransfer"
         />
       </div>
 
-      <div v-else class="text-center py-16 text-neutral-400">
+      <div
+        v-else
+        class="py-16 text-center text-neutral-400"
+      >
         Wallet is empty
       </div>
     </template>

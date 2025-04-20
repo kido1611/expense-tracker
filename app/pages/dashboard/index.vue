@@ -23,9 +23,9 @@ function useWalletTransfer() {
   const isSlideoverVisible = ref<boolean>(false);
   const selectedWallet = ref<string | null>(null);
 
-  function open(walletNanoid: string) {
+  function open(walletId: string) {
     isSlideoverVisible.value = true;
-    selectedWallet.value = walletNanoid;
+    selectedWallet.value = walletId;
   }
 
   return {
@@ -38,7 +38,7 @@ function useWalletTransfer() {
 
 <template>
   <UContainer>
-    <div class="flex flex-row flex-wrap gap-4 mt-8">
+    <div class="mt-8 flex flex-row flex-wrap gap-4">
       <WalletSlideover v-model:is-loading="isLoadingGlobal" />
       <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
       <WalletTransferSlideover

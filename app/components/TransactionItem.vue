@@ -1,35 +1,30 @@
 <script setup lang="ts">
-import type { Transaction } from "~/types";
-import { format, parse } from "date-fns";
+import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 
 const props = defineProps<{
-  transaction: Transaction;
+  transaction: TransactionResponse;
 }>();
 
 const realAmount = computed(() => {
-  if (props.transaction.category.is_expense) {
-    return `-${idrFormatter(props.transaction.amount)}`;
-  }
-
   return idrFormatter(props.transaction.amount);
 });
+
 const isoDate = computed(() => {
-  // return props.transaction.spend_at + " " + typeof props.transaction.spend_at;
-  return format(
-    parse(props.transaction.spend_at, "yyyy-MM-dd", new Date()),
-    "d MMMM yyyy",
-    {
-      locale: id,
-    },
-  );
+  const date =
+    props.transaction.spend_at instanceof Date
+      ? props.transaction.spend_at
+      : parseISO(props.transaction.spend_at);
+  return format(date, "d MMMM yyyy", {
+    locale: id,
+  });
 });
 
 const isDeleteLoading = ref<boolean>(false);
 async function deleteTransaction() {
   isDeleteLoading.value = true;
   try {
-    await $fetch(`/api/transactions/${props.transaction.nanoid}`, {
+    await $fetch(`/api/transactions/${props.transaction.id}`, {
       method: "DELETE",
     });
 
@@ -66,12 +61,12 @@ const dropdownItems = [
       v-if="
         !transaction.is_visible_in_report ||
         transaction.image_path ||
-        transaction.is_transfer
+        transaction.is_wallet_transfer
       "
-      class="flex flex-row items-center gap-x-4 gap-y-2 mb-2"
+      class="mb-2 flex flex-row items-center gap-x-4 gap-y-2"
     >
       <UBadge
-        v-if="transaction.is_transfer"
+        v-if="transaction.is_wallet_transfer"
         rounded
         color="warning"
         variant="subtle"
@@ -92,12 +87,12 @@ const dropdownItems = [
         >Report Hidden</UBadge
       >
     </div>
-    <div class="flex flex-row justify-between items-center gap-x-4">
-      <div class="flex flex-col space-y-0.5 flex-1">
+    <div class="flex flex-row items-center justify-between gap-x-4">
+      <div class="flex flex-1 flex-col space-y-0.5">
         <p class="font-semibold">{{ transaction.category.name }}</p>
         <p class="text-sm text-gray-300">{{ transaction.wallet.name }}</p>
       </div>
-      <div class="flex flex-col space-y-0.5 text-right flex-1">
+      <div class="flex flex-1 flex-col space-y-0.5 text-right">
         <p class="text-sm text-gray-300">{{ isoDate }}</p>
         <p
           class="text-sm"
@@ -128,7 +123,7 @@ const dropdownItems = [
     </div>
     <p
       v-if="transaction.note"
-      class="whitespace-pre-line text-gray-400 mt-2 line-clamp-1 text-sm"
+      class="mt-2 line-clamp-1 text-sm whitespace-pre-line text-gray-400"
     >
       {{ transaction.note }}
     </p>

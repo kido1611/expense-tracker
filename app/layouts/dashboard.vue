@@ -52,15 +52,15 @@ const userMenu: DropdownMenuItem[][] = [
 ];
 </script>
 <template>
-  <div class="grid grid-cols-1 md:grid-cols-(--dashboard-layout) overflow-clip">
-    <aside class="hidden md:block h-screen relative overflow-hidden">
+  <div class="grid grid-cols-1 overflow-clip md:grid-cols-(--dashboard-layout)">
+    <aside class="relative hidden h-screen overflow-hidden md:block">
       <div
-        class="fixed inset-0 bg-neutral-800 max-w-(--dashboard-sidebar-width) overflow-hidden h-screen"
+        class="fixed inset-0 h-screen max-w-(--dashboard-sidebar-width) overflow-hidden bg-neutral-800"
       >
         <div
-          class="grid grid-rows-(--dashboard-sidebar-layout) grid-cols-1 h-screen"
+          class="grid h-screen grid-cols-1 grid-rows-(--dashboard-sidebar-layout)"
         >
-          <div class="px-4 py-2 h-16 border border-red-300">
+          <div class="h-16 border border-red-300 px-4 py-2">
             Expense Tracker
           </div>
           <div class="h-full overflow-y-auto overscroll-none px-4 py-2">
@@ -69,10 +69,13 @@ const userMenu: DropdownMenuItem[][] = [
               v-for="item in menu"
               :key="item.path"
               :data-active="item.path === route.path"
-              class="flex flex-row items-center h-10 text-sm gap-x-3 text-neutral-400 data-[active=true]:text-white hover:bg-neutral-700 -mx-2 px-2 rounded-md font-medium"
+              class="-mx-2 flex h-10 flex-row items-center gap-x-3 rounded-md px-2 text-sm font-medium text-neutral-400 hover:bg-neutral-700 data-[active=true]:text-white"
               :to="item.path"
             >
-              <UIcon :name="item.icon" class="size-6 flex-none" />
+              <UIcon
+                :name="item.icon"
+                class="size-6 flex-none"
+              />
               <p :to="item.path">{{ item.title }}</p>
             </NuxtLink>
           </div>
@@ -88,27 +91,30 @@ const userMenu: DropdownMenuItem[][] = [
                 }"
               >
                 <button
-                  class="h-10 hover:bg-neutral-700 rounded-md flex flex-row items-center justify-center flex-col px-2 w-full text-left"
+                  class="flex h-10 w-full flex-row items-center justify-center rounded-md px-2 text-left hover:bg-neutral-700"
                 >
                   <!-- eslint-disable-next-line vue/html-self-closing -->
                   <img
                     loading="lazy"
                     :src="`https://ui-avatars.com/api/?name=${user?.name}`"
-                    class="flex-none size-7 rounded-full bg-red-200"
+                    class="size-8 flex-none rounded-full bg-red-200"
                   />
-                  <p class="flex-1 ml-3 text-sm font-medium">
-                    {{ user?.name }}
-                  </p>
+                  <div class="ml-3 flex flex-1 flex-col">
+                    <p class="text-sm font-medium">
+                      {{ user?.name }}
+                    </p>
+                    <p class="text-xs text-neutral-400">{{ user?.email }}</p>
+                  </div>
                 </button>
               </UDropdownMenu>
             </template>
             <NuxtLink
               v-else
               to="/login"
-              class="h-10 hover:bg-neutral-700 rounded-md flex flex-col justify-center px-2 w-full text-left text-sm"
+              class="flex h-10 w-full flex-col justify-center rounded-md px-2 text-left text-sm hover:bg-neutral-700"
             >
               <p class="font-medium">Guest</p>
-              <p class="text-neutral-400 text-xs">Login now</p>
+              <p class="text-xs text-neutral-400">Login now</p>
             </NuxtLink>
           </div>
         </div>

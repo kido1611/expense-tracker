@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { LoadingGlobal } from "@/utils/keys";
-import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
 const emit = defineEmits<{
@@ -12,7 +11,6 @@ const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
   setLoading: () => {},
 });
 
-type Schema = z.output<typeof walletSchema>;
 const state = reactive({
   name: "",
   balance: 0,
@@ -82,7 +80,7 @@ const icons = ref([
   },
 ]);
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<WalletCreate>) {
   setLoading(true);
 
   await $fetch("/api/wallets", {
@@ -112,15 +110,28 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <UForm
-    :schema="walletSchema"
+    :schema="WalletCreateSchema"
     :state="state"
     class="flex flex-col space-y-5"
     @submit="onSubmit"
   >
-    <UFormField label="Name" name="name" required>
-      <UInput v-model="state.name" type="text" required :disabled="isLoading" />
+    <UFormField
+      label="Name"
+      name="name"
+      required
+    >
+      <UInput
+        v-model="state.name"
+        type="text"
+        required
+        :disabled="isLoading"
+      />
     </UFormField>
-    <UFormField label="Balance" name="balance" required>
+    <UFormField
+      label="Balance"
+      name="balance"
+      required
+    >
       <UInputNumber
         v-model="state.balance"
         required
@@ -134,7 +145,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         }"
       />
     </UFormField>
-    <UFormField label="Icon" name="icon" required>
+    <UFormField
+      label="Icon"
+      name="icon"
+      required
+    >
       <USelectMenu
         v-model="state.icon"
         value-key="icon"

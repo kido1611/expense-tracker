@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
 import { format } from "date-fns";
@@ -8,11 +7,17 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { data: walletsData } = useFetch("/api/wallets", {
-  key: INDEX_WALLETS_CACHE_KEY_NAME,
+const { data: walletsData } = await useFetch("/api/wallets", {
+  deep: false,
+  transform: (value) => {
+    return value.data;
+  },
 });
-const { data: categoriesData } = useFetch("/api/categories", {
-  key: "categories",
+const { data: categoriesData } = await useFetch("/api/categories", {
+  deep: false,
+  transform: (value) => {
+    return value.data;
+  },
 });
 
 const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
@@ -21,10 +26,9 @@ const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
 });
 const inputPhoto = useTemplateRef<HTMLInputElement>("inputPhotoRef");
 
-type Schema = z.output<typeof transactionSchema>;
 const state = reactive({
-  walletNanoid: "",
-  categoryId: 0,
+  walletId: "",
+  categoryId: "",
   amount: 0,
   spendAt: format(new Date(), "yyyy-MM-dd"),
   note: "",
@@ -32,7 +36,7 @@ const state = reactive({
 });
 const statePhoto = ref<File | null | undefined>(null);
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
   setLoading(true);
 
   await $fetch("/api/transactions", {
@@ -40,10 +44,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     body: event.data,
   })
     .then(async (transaction) => {
-      await uploadImage(transaction.nanoid);
+      await uploadImage(transaction.data?.id);
 
-      state.walletNanoid = "";
-      state.categoryId = 0;
+      state.walletId = "";
+      state.categoryId = "";
       state.amount = 0;
       state.spendAt = format(new Date(), "yyyy-MM-dd");
       state.note = "";
@@ -71,8 +75,8 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
   // TODO: error on backend validation
 }
 
-async function uploadImage(nanoid: string | undefined) {
-  if (!nanoid) {
+async function uploadImage(id: string | undefined) {
+  if (!id) {
     return;
   }
 
@@ -83,7 +87,7 @@ async function uploadImage(nanoid: string | undefined) {
   const formData = new FormData();
   formData.append("image", statePhoto.value);
 
-  await $fetch(`/api/transactions/${nanoid}/image`, {
+  await $fetch(`/api/transactions/${id}/image`, {
     method: "POST",
     body: formData,
   }).catch((_err) => {
@@ -102,13 +106,11 @@ const selectedCategory = computed(() => {
 });
 
 const selectedWallet = computed(() => {
-  if (!state.walletNanoid) {
+  if (!state.walletId) {
     return null;
   }
 
-  return walletsData.value?.filter(
-    (data) => data.nanoid === state.walletNanoid,
-  )[0];
+  return walletsData.value?.filter((data) => data.id === state.walletId)[0];
 });
 
 async function onFileSelect(event: Event) {
@@ -121,17 +123,21 @@ async function onFileSelect(event: Event) {
 
 <template>
   <UForm
-    :schema="transactionSchema"
+    :schema="TransactionCreateSchema"
     :state="state"
     class="flex flex-col space-y-5"
     @submit="onSubmit"
   >
-    <UFormField label="Wallet" name="walletNanoid" required>
+    <UFormField
+      label="Wallet"
+      name="walletNanoid"
+      required
+    >
       <!-- TODO: save last selected wallet -->
 
       <USelectMenu
-        v-model="state.walletNanoid"
-        value-key="nanoid"
+        v-model="state.walletId"
+        value-key="id"
         label-key="name"
         :icon="selectedWallet?.icon ?? undefined"
         :items="walletsData"
@@ -145,7 +151,7 @@ async function onFileSelect(event: Event) {
             <p
               :class="{
                 'text-red-500': selectedWallet.balance < 0,
-                'dark:text-gray-400 text-gray-500': selectedWallet.balance >= 0,
+                'text-gray-500 dark:text-gray-400': selectedWallet.balance >= 0,
               }"
             >
               {{ idrFormatter(selectedWallet.balance) }}
@@ -155,14 +161,14 @@ async function onFileSelect(event: Event) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="flex-none size-5 text-primary"
+            class="text-primary size-5 flex-none"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
             <p
               :class="{
                 'text-red-500': item.balance < 0,
-                'dark:text-gray-400 text-gray-500': item.balance >= 0,
+                'text-gray-500 dark:text-gray-400': item.balance >= 0,
               }"
             >
               {{ idrFormatter(item.balance) }}
@@ -171,7 +177,11 @@ async function onFileSelect(event: Event) {
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField label="Category" name="categoryId" required>
+    <UFormField
+      label="Category"
+      name="categoryId"
+      required
+    >
       <USelectMenu
         v-model="state.categoryId"
         value-key="id"
@@ -181,14 +191,17 @@ async function onFileSelect(event: Event) {
         :disabled="isLoading"
         placeholder="Find category..."
       >
-        <template v-if="selectedCategory" #leading>
+        <template
+          v-if="selectedCategory"
+          #leading
+        >
           <UIcon
             :name="
               selectedCategory.is_expense
                 ? 'i-hugeicons-money-send-02'
                 : 'i-hugeicons-money-receive-02'
             "
-            class="flex-none size-5"
+            class="size-5 flex-none"
             :class="{
               'text-red-600': selectedCategory.is_expense,
               'text-green-600': !selectedCategory.is_expense,
@@ -197,9 +210,9 @@ async function onFileSelect(event: Event) {
         </template>
 
         <template v-if="selectedCategory">
-          <div class="flex flex-col space-y-0.5 ms-7 px-1 text-start">
+          <div class="flex flex-col space-y-0.5 px-1 text-start">
             <p class="font-medium">{{ selectedCategory.name }}</p>
-            <p class="text-xs dark:text-gray-400 text-gray-500">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               {{ selectedCategory.is_expense ? "Expense" : "Income" }}
             </p>
           </div>
@@ -211,7 +224,7 @@ async function onFileSelect(event: Event) {
                 ? 'i-hugeicons-money-send-02'
                 : 'i-hugeicons-money-receive-02'
             "
-            class="flex-none size-5"
+            class="size-5 flex-none"
             :class="{
               'text-red-600': item.is_expense,
               'text-green-600': !item.is_expense,
@@ -219,14 +232,18 @@ async function onFileSelect(event: Event) {
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
-            <p class="text-xs dark:text-gray-400 text-gray-500">
+            <p class="text-xs text-gray-500 dark:text-gray-400">
               {{ item.is_expense ? "Expense" : "Income" }}
             </p>
           </div>
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField label="Amount" name="amount" required>
+    <UFormField
+      label="Amount"
+      name="amount"
+      required
+    >
       <UInputNumber
         v-model="state.amount"
         required
@@ -240,7 +257,11 @@ async function onFileSelect(event: Event) {
         }"
       />
     </UFormField>
-    <UFormField label="Transaction at" name="spendAt" required>
+    <UFormField
+      label="Transaction at"
+      name="spendAt"
+      required
+    >
       <UInput
         v-model="state.spendAt"
         type="date"
@@ -248,7 +269,10 @@ async function onFileSelect(event: Event) {
         :disabled="isLoading"
       />
     </UFormField>
-    <UFormField label="Photo" name="photo">
+    <UFormField
+      label="Photo"
+      name="photo"
+    >
       <UInput
         ref="inputPhotoRef"
         type="file"
@@ -262,7 +286,10 @@ async function onFileSelect(event: Event) {
       name="isVisibleInReport"
       label="Show in report"
     />
-    <UFormField label="Note" name="note">
+    <UFormField
+      label="Note"
+      name="note"
+    >
       <UTextarea
         v-model="state.note"
         :rows="5"

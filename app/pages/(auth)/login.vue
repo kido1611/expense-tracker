@@ -1,5 +1,4 @@
 <script setup lang="ts">
-import type { z } from "zod";
 import type { FormSubmitEvent } from "#ui/types";
 
 definePageMeta({
@@ -12,14 +11,12 @@ const isShowPassword = ref<boolean>(false);
 const toast = useToast();
 const isLoading = ref<boolean>(false);
 
-type Schema = z.output<typeof loginSchema>;
-
 const state = reactive({
   email: "test@email.com",
   password: "password",
 });
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<UserLogin>) {
   isLoading.value = true;
 
   await $fetch("/api/auth/login", {
@@ -51,7 +48,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <NuxtLink to="/login">Login</NuxtLink>
     <NuxtLink to="/register">Register</NuxtLink>
     <UForm
-      :schema="loginSchema"
+      :schema="UserLoginSchema"
       :state="state"
       class="space-y-5 flex flex-col"
       @submit="onSubmit"

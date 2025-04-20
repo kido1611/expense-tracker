@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "@nuxt/ui";
-import type { z } from "zod";
 definePageMeta({
   middleware: "guest",
 });
@@ -17,9 +16,7 @@ const state = reactive({
   passwordConfirmation: "",
 });
 
-type Schema = z.output<typeof authRegisterSchema>;
-
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<UserCreate>) {
   isLoading.value = true;
 
   await $fetch("/api/auth/register", {
@@ -49,7 +46,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
     <NuxtLink to="/register">Register</NuxtLink>
 
     <UForm
-      :schema="authRegisterSchema"
+      :schema="UserCreateSchema"
       :state="state"
       class="space-y-5 flex flex-col"
       @submit="onSubmit"

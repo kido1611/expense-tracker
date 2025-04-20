@@ -1,6 +1,5 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
-import type { z } from "zod";
 
 import { format } from "date-fns";
 
@@ -16,14 +15,16 @@ const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
   setLoading: () => {},
 });
 
-const { data: walletsData } = useFetch("/api/wallets", {
-  key: INDEX_WALLETS_CACHE_KEY_NAME,
+const { data: walletsData } = await useLazyFetch("/api/wallets", {
+  deep: false,
+  transform: (value) => {
+    return value.data;
+  },
 });
 
-type Schema = z.output<typeof walletTransferSchema>;
 const state = reactive({
-  fromWalletNanoid: "",
-  toWalletNanoid: "",
+  fromWalletId: "",
+  toWalletId: "",
   amount: 0,
   note: "",
   transferAt: format(new Date(), "yyyy-MM-dd"),
@@ -32,32 +33,34 @@ const state = reactive({
 });
 
 const selectedFromWallet = computed(() => {
-  if (!state.fromWalletNanoid) {
+  if (!state.fromWalletId) {
     return null;
   }
 
-  return walletsData.value?.filter(
-    (data) => data.nanoid === state.fromWalletNanoid,
-  )[0];
+  return walletsData.value?.filter((data) => data.id === state.fromWalletId)[0];
 });
 const selectedToWallet = computed(() => {
-  if (!state.toWalletNanoid) {
+  if (!state.toWalletId) {
     return null;
   }
 
-  return walletsData.value?.filter(
-    (data) => data.nanoid === state.toWalletNanoid,
-  )[0];
+  return walletsData.value?.filter((data) => data.id === state.toWalletId)[0];
 });
 
-const toWalletsList = computed(() => {
-  if (!state.fromWalletNanoid) {
+const fromWalletList = computed(() => {
+  if (!walletsData.value) {
     return [];
   }
 
-  return walletsData.value?.filter(
-    (data) => data.nanoid !== state.fromWalletNanoid,
-  );
+  return walletsData.value ?? [];
+});
+
+const toWalletsList = computed(() => {
+  if (!state.fromWalletId) {
+    return [];
+  }
+
+  return fromWalletList.value.filter((data) => data.id !== state.fromWalletId);
 });
 
 watch(
@@ -71,35 +74,35 @@ watch(
   },
 );
 watch(
-  () => state.fromWalletNanoid,
+  () => state.fromWalletId,
   () => {
-    state.toWalletNanoid = "";
+    state.toWalletId = "";
   },
 );
 
 onMounted(() => {
   if (props.selectedWallet) {
-    state.fromWalletNanoid = props.selectedWallet;
+    state.fromWalletId = props.selectedWallet;
   }
 });
 
-async function onSubmit(event: FormSubmitEvent<Schema>) {
+async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
   setLoading(true);
 
   await $fetch("/api/wallets/transfer", {
     method: "POST",
     body: event.data,
   })
-    .then(async () => {
-      state.fromWalletNanoid = "";
-      state.toWalletNanoid = "";
+    .then(() => {
+      state.fromWalletId = "";
+      state.toWalletId = "";
       state.amount = 0;
       state.note = "";
       state.transferAt = format(new Date(), "yyyy-MM-dd");
       state.withFee = false;
       state.feeAmount = 0;
 
-      await refreshNuxtData([
+      refreshNuxtData([
         INDEX_WALLETS_CACHE_KEY_NAME,
         INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
       ]);
@@ -117,18 +120,22 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
 
 <template>
   <UForm
-    :schema="walletTransferSchema"
+    :schema="WalletTransferCreateSchema"
     :state="state"
-    class="flex flex-col space-y-5 max-w-md mx-auto"
+    class="mx-auto flex max-w-md flex-col space-y-5"
     @submit="onSubmit"
   >
-    <UFormField label="From" name="fromWalletNanoid" required>
+    <UFormField
+      label="From"
+      name="fromWalletNanoid"
+      required
+    >
       <USelectMenu
-        v-model="state.fromWalletNanoid"
-        value-key="nanoid"
+        v-model="state.fromWalletId"
+        value-key="id"
         label-key="name"
         :icon="selectedFromWallet?.icon ?? undefined"
-        :items="walletsData"
+        :items="fromWalletList"
         required
         :disabled="isLoading"
         placeholder="Find wallet..."
@@ -139,7 +146,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             <p
               :class="{
                 'text-red-500': selectedFromWallet.balance < 0,
-                'dark:text-gray-400 text-gray-500':
+                'text-gray-500 dark:text-gray-400':
                   selectedFromWallet.balance >= 0,
               }"
             >
@@ -150,14 +157,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="flex-none size-5 text-primary"
+            class="text-primary size-5 flex-none"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
             <p
               :class="{
                 'text-red-500': item.balance < 0,
-                'dark:text-gray-400 text-gray-500': item.balance >= 0,
+                'text-gray-500 dark:text-gray-400': item.balance >= 0,
               }"
             >
               {{ idrFormatter(item.balance) }}
@@ -166,10 +173,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         </template>
       </USelectMenu>
     </UFormField>
-    <UFormField label="To" name="toWalletNanoid" required>
+    <UFormField
+      label="To"
+      name="toWalletNanoid"
+      required
+    >
       <USelectMenu
-        v-model="state.toWalletNanoid"
-        value-key="nanoid"
+        v-model="state.toWalletId"
+        value-key="id"
         label-key="name"
         :icon="selectedToWallet?.icon ?? undefined"
         :items="toWalletsList"
@@ -183,7 +194,7 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
             <p
               :class="{
                 'text-red-500': selectedToWallet.balance < 0,
-                'dark:text-gray-400 text-gray-500':
+                'text-gray-500 dark:text-gray-400':
                   selectedToWallet.balance >= 0,
               }"
             >
@@ -194,14 +205,14 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="flex-none size-5 text-primary"
+            class="text-primary size-5 flex-none"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
             <p
               :class="{
                 'text-red-500': item.balance < 0,
-                'dark:text-gray-400 text-gray-500': item.balance >= 0,
+                'text-gray-500 dark:text-gray-400': item.balance >= 0,
               }"
             >
               {{ idrFormatter(item.balance) }}
@@ -211,7 +222,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
       </USelectMenu>
     </UFormField>
 
-    <UFormField label="Amount" name="amount" required>
+    <UFormField
+      label="Amount"
+      name="amount"
+      required
+    >
       <UInputNumber
         v-model="state.amount"
         required
@@ -225,7 +240,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         }"
       />
     </UFormField>
-    <UFormField label="Transfer at" name="transferAt" required>
+    <UFormField
+      label="Transfer at"
+      name="transferAt"
+      required
+    >
       <UInput
         v-model="state.transferAt"
         type="date"
@@ -233,7 +252,10 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         :disabled="isLoading"
       />
     </UFormField>
-    <UFormField label="Note" name="note">
+    <UFormField
+      label="Note"
+      name="note"
+    >
       <UTextarea
         v-model="state.note"
         :rows="5"
@@ -241,7 +263,11 @@ async function onSubmit(event: FormSubmitEvent<Schema>) {
         placeholder="Explain about the transfer"
       />
     </UFormField>
-    <UCheckbox v-model="state.withFee" name="withFee" label="Transfer Fee" />
+    <UCheckbox
+      v-model="state.withFee"
+      name="withFee"
+      label="Transfer Fee"
+    />
     <UFormField
       v-if="state.withFee"
       label="Fee Amount"
