@@ -1,4 +1,3 @@
-import { sql } from "drizzle-orm";
 import {
   sqliteTable,
   text,
@@ -8,53 +7,52 @@ import {
   primaryKey,
 } from "drizzle-orm/sqlite-core";
 
-export const users = sqliteTable(
-  "users",
-  {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    uuid: text("uuid").notNull().unique(),
-    name: text("name").notNull(),
-    email: text("email").notNull().unique(),
-    password: text("password").notNull(),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-  },
-  (table) => {
-    return {
-      uuidIdx: index("users_uuid_idx").on(table.uuid),
-    };
-  },
-);
+import { v7 as uuidv7 } from "uuid";
+
+// ------------------------------------------------------------------- predefined data-type
+const uuidAsId = text("id").primaryKey().$defaultFn(uuidv7);
+const createdAt = integer("created_at", {
+  mode: "timestamp_ms",
+})
+  .notNull()
+  .$defaultFn(() => new Date());
+const updatedAt = integer("updated_at", {
+  mode: "timestamp_ms",
+})
+  .notNull()
+  .$defaultFn(() => new Date())
+  .$onUpdateFn(() => new Date());
+const deletedAt = integer("deleted_at", {
+  mode: "timestamp_ms",
+});
+
+// ------------------------------------------------------------------- schema
+export const users = sqliteTable("users", {
+  id: uuidAsId,
+  name: text("name").notNull(),
+  email: text("email").notNull().unique(),
+  password: text("password").notNull(),
+  createdAt: createdAt,
+  updatedAt: updatedAt,
+  deletedAt: deletedAt,
+});
 
 export const wallets = sqliteTable(
   "wallets",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id").notNull(),
-    nanoid: text("nanoid").notNull().unique(),
+    id: uuidAsId,
+    userId: text("user_id").notNull(),
     name: text("name").notNull(),
     balance: integer("balance").notNull().default(0),
     icon: text("icon"),
     sortOrder: integer("sort_order").default(1),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
-    disabledAt: text("disabled_at"),
-    // enable soft-delete, used in ledger table
-    deletedAt: text("deleted_at"),
+    createdAt: createdAt,
+    updatedAt: updatedAt,
+    disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
+    deletedAt: deletedAt,
   },
   (table) => {
     return {
-      nanoidIdx: index("wallets_nanoid_idx").on(table.nanoid),
       userIdIdx: index("wallets_user_id_idx").on(table.userId),
       nameIdx: index("wallets_name_idx").on(table.name),
       userReference: foreignKey({
@@ -69,16 +67,11 @@ export const wallets = sqliteTable(
 export const budgets = sqliteTable(
   "budgets",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id").notNull(),
+    id: uuidAsId,
+    userId: text("user_id").notNull(),
     amount: integer("amount").notNull().default(0),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    createdAt: createdAt,
+    updatedAt: updatedAt,
   },
   (table) => {
     return {
@@ -94,22 +87,19 @@ export const budgets = sqliteTable(
 export const categories = sqliteTable(
   "categories",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id").notNull(),
+    id: uuidAsId,
+    userId: text("user_id").notNull(),
     // key will be used to auto detect category when transaction is created by system
     // like transfer, adjust balance, create wallet, etc.
     key: text("key"),
     name: text("name").notNull(),
-    isExpense: integer("is_expense", { mode: "boolean" }).default(false),
+    isExpense: integer("is_expense", { mode: "boolean" })
+      .notNull()
+      .default(false),
     icon: text("icon"),
     sortOrder: integer("sort_order").default(1),
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    createdAt: createdAt,
+    updatedAt: updatedAt,
   },
   (table) => {
     return {
@@ -125,39 +115,30 @@ export const categories = sqliteTable(
 export const transactions = sqliteTable(
   "transactions",
   {
-    id: integer("id").primaryKey({ autoIncrement: true }),
-    userId: integer("user_id").notNull(),
-    walletId: integer("wallet_id").notNull(),
-    categoryId: integer("category_id").notNull(),
-    budgetId: integer("budget_id"),
+    id: uuidAsId,
+    userId: text("user_id").notNull(),
+    walletId: text("wallet_id").notNull(),
+    categoryId: text("category_id").notNull(),
+    budgetId: text("budget_id"),
 
-    nanoid: text("nanoid").notNull().unique(),
     //  store absoslute amount
     amount: integer("amount").notNull().default(0),
-    // store signed amount
-    realAmount: integer("real_amount").notNull().default(0),
     imagePath: text("image_path"),
     note: text("note"),
     // form has option to hide transaction from report. Used on transfer balance between wallet
     isVisibleInReport: integer("is_visible_in_report", {
       mode: "boolean",
-    }).default(true),
+    })
+      .notNull()
+      .default(true),
 
-    spendAt: text("spend_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
+    spendAt: integer("spend_at", { mode: "timestamp_ms" }).notNull(),
 
-    createdAt: text("created_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`),
-    updatedAt: text("updated_at")
-      .notNull()
-      .default(sql`(CURRENT_TIMESTAMP)`)
-      .$onUpdate(() => sql`(CURRENT_TIMESTAMP)`),
+    createdAt: createdAt,
+    updatedAt: updatedAt,
   },
   (table) => {
     return {
-      nanoidIdx: index("transactions_nanoid_idx").on(table.nanoid),
       userReference: foreignKey({
         columns: [table.userId],
         foreignColumns: [users.id],
@@ -185,9 +166,9 @@ export const transactions = sqliteTable(
 export const walletTransfers = sqliteTable(
   "wallet_transfers",
   {
-    sourceTransactionId: integer("source_transaction_id").notNull(),
-    targetTransactionId: integer("target_transaction_id").notNull(),
-    feeTransactionId: integer("fee_transaction_id"),
+    sourceTransactionId: text("source_transaction_id").notNull(),
+    targetTransactionId: text("target_transaction_id").notNull(),
+    feeTransactionId: text("fee_transaction_id"),
   },
   (table) => {
     return {
