@@ -37,17 +37,28 @@ const isSkeletonVisible = computed(() => {
     </template>
 
     <template v-else>
-      <div
-        v-if="data && data.length > 0"
-        class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
-      >
-      </div>
+      <template v-if="data && data.length > 0">
+        <div
+          class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
+        >
           <TransactionItem
             v-for="transaction in data"
             :key="transaction.id"
             :transaction="transaction"
             :show-note="false"
           />
+        </div>
+        <div class="mt-4 flex flex-row justify-end">
+          <UButton
+            to="/dashboard/transactions"
+            size="md"
+            variant="subtle"
+            trailing-icon="i-tabler-arrow-right"
+          >
+            Others...
+          </UButton>
+        </div>
+      </template>
       <div
         v-else
         class="py-16 text-center text-neutral-400"

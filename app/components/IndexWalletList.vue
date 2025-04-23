@@ -42,17 +42,18 @@ const openWalletTransfer = (walletId: string) => {
     </template>
 
     <template v-else>
-      <div
-        v-if="data && data.length > 0"
-        class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
-      >
-        <WalletItem
-          v-for="wallet in data"
-          :key="wallet.id"
-          :wallet="wallet"
-          @transfer="openWalletTransfer"
-        />
-      </div>
+      <template v-if="data && data.length > 0">
+        <div
+          class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
+        >
+          <WalletItem
+            v-for="wallet in data"
+            :key="wallet.id"
+            :wallet="wallet"
+            @transfer="openWalletTransfer"
+          />
+        </div>
+      </template>
 
       <div
         v-else
