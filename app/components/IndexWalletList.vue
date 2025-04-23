@@ -62,5 +62,7 @@ const openWalletTransfer = (walletId: string) => {
         Wallet is empty
       </div>
     </template>
+
+    <LazyWalletAdjustBalanceSlideover hydrate-on-visible />
   </div>
 </template>

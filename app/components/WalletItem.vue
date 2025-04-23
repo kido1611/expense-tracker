@@ -1,5 +1,7 @@
 <script setup lang="ts">
-const props = defineProps<{
+import { useWalletAdjustBalanceDialogStore } from "~/stores/wallet";
+
+const { wallet } = defineProps<{
   wallet: WalletResponse;
 }>();
 
@@ -7,11 +9,14 @@ const emits = defineEmits<{
   transfer: [walletNanoid: string];
 }>();
 
+const walletAdjustBalanceStore = useWalletAdjustBalanceDialogStore();
+const { open: openAdjustBalance } = walletAdjustBalanceStore;
+
 const isDeleteLoading = ref<boolean>(false);
 async function deleteWallet() {
   isDeleteLoading.value = true;
   try {
-    await $fetch(`/api/wallets/${props.wallet.id}`, {
+    await $fetch(`/api/wallets/${wallet.id}`, {
       method: "DELETE",
     });
 
@@ -31,17 +36,17 @@ async function deleteWallet() {
 const dropdownItems = [
   [
     {
-      label: "Transfer",
-      icon: "i-tabler-transfer",
-      onSelect() {
-        emits("transfer", props.wallet.id);
-      },
-    },
-    {
       label: "Adjust Balance",
       icon: "i-tabler-cash-banknote-edit",
       onSelect() {
-        // TODO
+        openAdjustBalance(wallet.id);
+      },
+    },
+    {
+      label: "Transfer",
+      icon: "i-tabler-transfer",
+      onSelect() {
+        emits("transfer", wallet.id);
       },
     },
   ],
