@@ -5,6 +5,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
+const toast = useToast();
 const { isLoading, setLoading } = useLoading();
 
 const state = reactive({
@@ -95,8 +96,13 @@ async function onSubmit(event: FormSubmitEvent<WalletCreate>) {
     ]);
 
     emit("close");
-  } catch (error) {
-    // TODO: show error toast
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when creating wallet",
+      color: "error",
+    });
   } finally {
     setLoading(false);
   }

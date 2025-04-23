@@ -11,6 +11,8 @@ const emit = defineEmits<{
 }>();
 
 const { isLoading, setLoading } = useLoading();
+const toast = useToast();
+
 const { data: walletsData } = await useFetch("/api/wallets", {
   deep: false,
   lazy: true,
@@ -106,8 +108,13 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     ]);
 
     emit("close");
-  } catch (error) {
-    // TODO: show toast error
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when creating transfer wallet",
+      color: "error",
+    });
   } finally {
     setLoading(false);
   }

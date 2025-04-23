@@ -9,6 +9,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
+const toast = useToast();
 const { isLoading: isLoadingGlobal, setLoading } = useLoading();
 
 const state = reactive({
@@ -59,9 +60,13 @@ async function onSubmit(event: FormSubmitEvent<WalletAdjustBalanceCreate>) {
     ]);
 
     emit("close");
-  } catch (error) {
-    // TODO: add toast
-    console.log(error);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when update wallet balance",
+      color: "error",
+    });
   } finally {
     setLoading(false);
   }

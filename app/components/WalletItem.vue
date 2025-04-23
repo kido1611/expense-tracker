@@ -9,6 +9,8 @@ const emits = defineEmits<{
   transfer: [walletNanoid: string];
 }>();
 
+const toast = useToast();
+
 const walletAdjustBalanceStore = useWalletAdjustBalanceDialogStore();
 const { open: openAdjustBalance } = walletAdjustBalanceStore;
 
@@ -20,14 +22,22 @@ async function deleteWallet() {
       method: "DELETE",
     });
 
-    // TODO: Toast
     await refreshNuxtData([
       INDEX_WALLETS_CACHE_KEY_NAME,
       INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
     ]);
-  } catch (err) {
-    console.log(err);
-    // TODO: Toast
+
+    toast.add({
+      title: "Success delete wallet",
+      color: "success",
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when delete wallet",
+      color: "error",
+    });
   } finally {
     isDeleteLoading.value = false;
   }

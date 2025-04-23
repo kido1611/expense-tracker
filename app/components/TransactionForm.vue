@@ -22,7 +22,9 @@ const { data: categoriesData } = await useFetch("/api/categories", {
   },
 });
 
+const toast = useToast();
 const { isLoading, setLoading } = useLoading();
+
 const inputPhoto = useTemplateRef<HTMLInputElement>("inputPhotoRef");
 
 const state = reactive({
@@ -64,8 +66,13 @@ async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
     ]);
 
     emit("close");
-  } catch (error) {
-    // TODO: show toast
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when creating transaction",
+      color: "error",
+    });
   } finally {
     setLoading(false);
   }
@@ -88,8 +95,14 @@ async function uploadImage(transactionId: string | undefined) {
       method: "POST",
       body: formData,
     });
-  } catch (error) {
-    // TODO: show toast
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description:
+        "Error when uploading photo file, but success when create transaction.",
+      color: "error",
+    });
   }
 }
 

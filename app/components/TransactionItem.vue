@@ -7,6 +7,8 @@ const { transaction, showNote = true } = defineProps<{
   showNote?: boolean;
 }>();
 
+const toast = useToast();
+
 const realAmount = computed(() => {
   return idrFormatter(transaction.amount);
 });
@@ -29,14 +31,22 @@ async function deleteTransaction() {
       method: "DELETE",
     });
 
-    // TODO: Toast
     await refreshNuxtData([
       INDEX_WALLETS_CACHE_KEY_NAME,
       INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
     ]);
-  } catch (err) {
-    // TODO: Toast
-    console.log(err);
+
+    toast.add({
+      title: "Success delete transaction",
+      color: "success",
+    });
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (_) {
+    toast.add({
+      title: "Failed",
+      description: "Error when delete transaction",
+      color: "error",
+    });
   } finally {
     isDeleteLoading.value = false;
   }
