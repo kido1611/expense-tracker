@@ -41,12 +41,13 @@ const isSkeletonVisible = computed(() => {
         v-if="data && data.length > 0"
         class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
       >
-        <TransactionItem
-          v-for="transaction in data"
-          :key="transaction.id"
-          :transaction="transaction"
-        />
       </div>
+          <TransactionItem
+            v-for="transaction in data"
+            :key="transaction.id"
+            :transaction="transaction"
+            :show-note="false"
+          />
       <div
         v-else
         class="py-16 text-center text-neutral-400"

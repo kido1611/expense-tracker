@@ -2,19 +2,20 @@
 import { format, parseISO } from "date-fns";
 import { id } from "date-fns/locale";
 
-const props = defineProps<{
+const { transaction, showNote = true } = defineProps<{
   transaction: TransactionResponse;
+  showNote?: boolean;
 }>();
 
 const realAmount = computed(() => {
-  return idrFormatter(props.transaction.amount);
+  return idrFormatter(transaction.amount);
 });
 
 const isoDate = computed(() => {
   const date =
-    props.transaction.spend_at instanceof Date
-      ? props.transaction.spend_at
-      : parseISO(props.transaction.spend_at);
+    transaction.spend_at instanceof Date
+      ? transaction.spend_at
+      : parseISO(transaction.spend_at);
   return format(date, "d MMMM yyyy", {
     locale: id,
   });
@@ -24,7 +25,7 @@ const isDeleteLoading = ref<boolean>(false);
 async function deleteTransaction() {
   isDeleteLoading.value = true;
   try {
-    await $fetch(`/api/transactions/${props.transaction.id}`, {
+    await $fetch(`/api/transactions/${transaction.id}`, {
       method: "DELETE",
     });
 
@@ -122,7 +123,7 @@ const dropdownItems = [
       </UDropdownMenu>
     </div>
     <p
-      v-if="transaction.note"
+      v-if="showNote && transaction.note"
       class="mt-2 line-clamp-1 text-sm whitespace-pre-line text-gray-400"
     >
       {{ transaction.note }}
