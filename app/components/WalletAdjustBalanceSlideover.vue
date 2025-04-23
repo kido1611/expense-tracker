@@ -15,7 +15,6 @@ const { close } = walletAdjustBalanceStore;
     :close="!isLoading"
     title="Adjust Balance"
   >
-    {{ isVisible }}
     <template #body>
       <LazyWalletAdjustBalanceForm
         hydrate-on-visible
