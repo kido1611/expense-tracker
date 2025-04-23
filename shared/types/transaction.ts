@@ -13,7 +13,7 @@ export const TransactionCreateSchema = z.object({
 
 export type TransactionCreate = z.output<typeof TransactionCreateSchema>;
 
-export type TransactionInsert = TransactionCreate & {
+export type TransactionInsert = Omit<TransactionCreate, "spendAt"> & {
   userId: string;
   spendAt: Date;
 };
