@@ -8,6 +8,7 @@ export default defineNuxtConfig({
     "@nuxt/ui",
     "nuxt-auth-utils",
     "@nuxt/test-utils/module",
+    "@pinia/nuxt",
   ],
   future: {
     compatibilityVersion: 4,
@@ -36,4 +37,8 @@ export default defineNuxtConfig({
       ssr: false,
     },
   },
+  pinia: {
+    storesDirs: ["./app/stores/**"],
+  },
 });
+
