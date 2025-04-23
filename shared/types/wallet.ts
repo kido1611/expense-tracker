@@ -15,3 +15,15 @@ export type WalletResponse = {
   icon: string | null | undefined;
   created_at: Date | string;
 };
+
+export const WalletRouteParamSchema = z.object({
+  id: z.uuid(),
+});
+
+export const WalletAdjustBalanceCreateSchema = z.object({
+  balance: z.coerce.number().gte(0),
+});
+
+export type WalletAdjustBalanceCreate = z.output<
+  typeof WalletAdjustBalanceCreateSchema
+>;

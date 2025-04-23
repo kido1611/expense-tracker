@@ -15,8 +15,16 @@ export const httpStatusMessage = {
     statusCode: 401,
     statusMessage: "Unauthorized",
   },
+  404: {
+    statusCode: 404,
+    statusMessage: "Not Found",
+  },
   409: {
     statusCode: 409,
     statusMessage: "Conflict",
+  },
+  500: {
+    statusCode: 500,
+    statusMessage: "Internal Server Error",
   },
 };
