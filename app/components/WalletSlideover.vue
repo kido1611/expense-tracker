@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const isLoading = defineModel<boolean>("isLoading", {
-  default: false,
-});
+const { isLoading } = useLoading();
 
 const open = ref(false);
 </script>
@@ -13,9 +11,16 @@ const open = ref(false);
     :close="!isLoading"
     title="Add Wallet"
   >
-    <UButton type="button" icon="i-tabler-plus">Add Wallet</UButton>
+    <UButton
+      type="button"
+      icon="i-tabler-plus"
+      >Add Wallet</UButton
+    >
     <template #body>
-      <LazyWalletForm hydrate-on-visible @close="open = false" />
+      <LazyWalletForm
+        hydrate-on-visible
+        @close="open = false"
+      />
     </template>
   </USlideover>
 </template>

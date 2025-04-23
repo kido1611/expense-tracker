@@ -4,15 +4,6 @@ definePageMeta({
   layout: "dashboard",
 });
 
-const isLoadingGlobal = ref(false);
-function setLoadingGlobal(current: boolean) {
-  isLoadingGlobal.value = current;
-}
-provide(LoadingGlobalKey, {
-  isLoading: readonly(isLoadingGlobal),
-  setLoading: setLoadingGlobal,
-});
-
 const {
   isSlideoverVisible: isWalletTransferSlideoverVisible,
   selectedWallet: selectedWalletTransfer,
@@ -39,10 +30,9 @@ function useWalletTransfer() {
 <template>
   <UContainer>
     <div class="mt-8 flex flex-row flex-wrap gap-4">
-      <WalletSlideover v-model:is-loading="isLoadingGlobal" />
-      <TransactionSlideover v-model:is-loading="isLoadingGlobal" />
+      <WalletSlideover />
+      <TransactionSlideover />
       <WalletTransferSlideover
-        v-model:is-loading="isLoadingGlobal"
         v-model:selected="selectedWalletTransfer"
         v-model:is-visible="isWalletTransferSlideoverVisible"
       />

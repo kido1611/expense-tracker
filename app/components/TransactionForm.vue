@@ -22,10 +22,7 @@ const { data: categoriesData } = await useFetch("/api/categories", {
   },
 });
 
-const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
-  isLoading: ref(false),
-  setLoading: () => {},
-});
+const { isLoading, setLoading } = useLoading();
 const inputPhoto = useTemplateRef<HTMLInputElement>("inputPhotoRef");
 
 const state = reactive({
@@ -39,46 +36,43 @@ const state = reactive({
 const statePhoto = ref<File | null | undefined>(null);
 
 async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
-  setLoading(true);
+  try {
+    setLoading(true);
 
-  await $fetch("/api/transactions", {
-    method: "POST",
-    body: event.data,
-  })
-    .then(async (transaction) => {
-      await uploadImage(transaction.data?.id);
-
-      state.walletId = "";
-      state.categoryId = "";
-      state.amount = 0;
-      state.spendAt = format(new Date(), "yyyy-MM-dd");
-      state.note = "";
-      state.isVisibleInReport = true;
-      statePhoto.value = null;
-
-      if (inputPhoto.value) {
-        inputPhoto.value.value = "";
-      }
-
-      await refreshNuxtData([
-        INDEX_WALLETS_CACHE_KEY_NAME,
-        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
-      ]);
-
-      emit("close");
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => {
-      setLoading(false);
+    const transaction = await $fetch("/api/transactions", {
+      method: "POST",
+      body: event.data,
     });
 
-  // TODO: error on backend validation
+    await uploadImage(transaction.data?.id);
+
+    state.walletId = "";
+    state.categoryId = "";
+    state.amount = 0;
+    state.spendAt = format(new Date(), "yyyy-MM-dd");
+    state.note = "";
+    state.isVisibleInReport = true;
+    statePhoto.value = null;
+
+    if (inputPhoto.value) {
+      inputPhoto.value.value = "";
+    }
+
+    await refreshNuxtData([
+      INDEX_WALLETS_CACHE_KEY_NAME,
+      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+    ]);
+
+    emit("close");
+  } catch (error) {
+    // TODO: show toast
+  } finally {
+    setLoading(false);
+  }
 }
 
-async function uploadImage(id: string | undefined) {
-  if (!id) {
+async function uploadImage(transactionId: string | undefined) {
+  if (!transactionId) {
     return;
   }
 
@@ -86,15 +80,17 @@ async function uploadImage(id: string | undefined) {
     return;
   }
 
-  const formData = new FormData();
-  formData.append("image", statePhoto.value);
+  try {
+    const formData = new FormData();
+    formData.append("image", statePhoto.value);
 
-  await $fetch(`/api/transactions/${id}/image`, {
-    method: "POST",
-    body: formData,
-  }).catch((_err) => {
-    // TODO: Toast failed uploading image
-  });
+    await $fetch(`/api/transactions/${transactionId}/image`, {
+      method: "POST",
+      body: formData,
+    });
+  } catch (error) {
+    // TODO: show toast
+  }
 }
 
 const selectedCategory = computed(() => {

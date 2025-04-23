@@ -1,7 +1,5 @@
 <script setup lang="ts">
-const isLoading = defineModel<boolean>("isLoading", {
-  default: false,
-});
+const { isLoading } = useLoading();
 const selected = defineModel<string | null>("selected", {
   default: "",
 });
@@ -17,7 +15,11 @@ const open = defineModel<boolean>("isVisible", {
     :close="!isLoading"
     title="Transfer Wallet"
   >
-    <UButton type="button" icon="i-tabler-transfer">Transfer Wallet</UButton>
+    <UButton
+      type="button"
+      icon="i-tabler-transfer"
+      >Transfer Wallet</UButton
+    >
     <template #body>
       <LazyWalletTransferForm
         hydrate-on-visible

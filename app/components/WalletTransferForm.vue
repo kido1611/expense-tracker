@@ -10,11 +10,7 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
-  isLoading: ref(false),
-  setLoading: () => {},
-});
-
+const { isLoading, setLoading } = useLoading();
 const { data: walletsData } = await useFetch("/api/wallets", {
   deep: false,
   lazy: true,
@@ -88,34 +84,33 @@ onMounted(() => {
 });
 
 async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
-  setLoading(true);
+  try {
+    setLoading(true);
 
-  await $fetch("/api/wallets/transfer", {
-    method: "POST",
-    body: event.data,
-  })
-    .then(() => {
-      state.fromWalletId = "";
-      state.toWalletId = "";
-      state.amount = 0;
-      state.note = "";
-      state.transferAt = format(new Date(), "yyyy-MM-dd");
-      state.withFee = false;
-      state.feeAmount = 0;
-
-      refreshNuxtData([
-        INDEX_WALLETS_CACHE_KEY_NAME,
-        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
-      ]);
-
-      emit("close");
-    })
-    .catch((_err) => {
-      // TODO: error on backend validation
-    })
-    .finally(() => {
-      setLoading(false);
+    await $fetch("/api/wallets/transfer", {
+      method: "POST",
+      body: event.data,
     });
+
+    state.fromWalletId = "";
+    state.toWalletId = "";
+    state.amount = 0;
+    state.note = "";
+    state.transferAt = format(new Date(), "yyyy-MM-dd");
+    state.withFee = false;
+    state.feeAmount = 0;
+
+    await refreshNuxtData([
+      INDEX_WALLETS_CACHE_KEY_NAME,
+      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+    ]);
+
+    emit("close");
+  } catch (error) {
+    // TODO: show toast error
+  } finally {
+    setLoading(false);
+  }
 }
 </script>
 

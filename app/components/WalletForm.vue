@@ -1,15 +1,11 @@
 <script setup lang="ts">
-import type { LoadingGlobal } from "@/utils/keys";
 import type { FormSubmitEvent } from "#ui/types";
 
 const emit = defineEmits<{
   close: [];
 }>();
 
-const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
-  isLoading: ref(false),
-  setLoading: () => {},
-});
+const { isLoading, setLoading } = useLoading();
 
 const state = reactive({
   name: "",
@@ -81,30 +77,29 @@ const icons = ref([
 ]);
 
 async function onSubmit(event: FormSubmitEvent<WalletCreate>) {
-  setLoading(true);
+  try {
+    setLoading(true);
 
-  await $fetch("/api/wallets", {
-    method: "POST",
-    body: event.data,
-  })
-    .then(async () => {
-      state.name = "";
-      state.balance = 0;
-      state.icon = "i-tabler-wallet";
-
-      await refreshNuxtData([
-        INDEX_WALLETS_CACHE_KEY_NAME,
-        INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
-      ]);
-
-      emit("close");
-    })
-    .catch((err) => {
-      console.log(err);
-    })
-    .finally(() => {
-      setLoading(false);
+    await $fetch("/api/wallets", {
+      method: "POST",
+      body: event.data,
     });
+
+    state.name = "";
+    state.balance = 0;
+    state.icon = "i-tabler-wallet";
+
+    await refreshNuxtData([
+      INDEX_WALLETS_CACHE_KEY_NAME,
+      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
+    ]);
+
+    emit("close");
+  } catch (error) {
+    // TODO: show error toast
+  } finally {
+    setLoading(false);
+  }
 }
 </script>
 
