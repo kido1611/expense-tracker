@@ -92,7 +92,7 @@ async function onSubmit(event: FormSubmitEvent<WalletAdjustBalanceCreate>) {
           class="size-5"
         />
       </div>
-      <div class="flex flex-1 flex-col space-y-0.5">
+      <div class="flex flex-1 flex-col">
         <p class="font-semibold">{{ walletData.name }}</p>
         <p
           class="text-xs text-gray-300"

@@ -1,16 +1,16 @@
 <script setup lang="ts">
+import { useWalletTransferDialogStore } from "~/stores/wallet";
+
 const { isLoading } = useLoading();
-const selected = defineModel<string | null>("selected", {
-  default: "",
-});
-const open = defineModel<boolean>("isVisible", {
-  default: false,
-});
+
+const store = useWalletTransferDialogStore();
+const { isVisible, selectedWallet } = storeToRefs(store);
+const { close } = store;
 </script>
 
 <template>
   <USlideover
-    v-model:open="open"
+    v-model:open="isVisible"
     :dismissible="!isLoading"
     :close="!isLoading"
     title="Transfer Wallet"
@@ -23,8 +23,8 @@ const open = defineModel<boolean>("isVisible", {
     <template #body>
       <LazyWalletTransferForm
         hydrate-on-visible
-        :selected-wallet="selected"
-        @close="open = false"
+        :selected-wallet-id="selectedWallet"
+        @close="close"
       />
     </template>
   </USlideover>

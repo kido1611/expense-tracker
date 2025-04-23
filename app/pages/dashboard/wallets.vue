@@ -7,6 +7,6 @@ definePageMeta({
 <template>
   <div class="py-10">
     <h1>Wallets</h1>
-    <WalletTransferForm :selected-wallet="null" />
+    <WalletTransferForm :selected-wallet-id="null" />
   </div>
 </template>

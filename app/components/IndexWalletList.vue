@@ -1,7 +1,11 @@
 <script setup lang="ts">
-const emit = defineEmits<{
-  transfer: [walletNanoid: string];
-}>();
+import { useWalletTransferDialogStore } from "~/stores/wallet";
+
+const walletTransferStore = useWalletTransferDialogStore();
+const { open: openWalletTransfer } = walletTransferStore;
+
+const walletAdjustBalanceStore = useWalletAdjustBalanceDialogStore();
+const { open: openAdjustBalance } = walletAdjustBalanceStore;
 
 const { data, status } = await useFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
@@ -20,10 +24,6 @@ const isSkeletonVisible = computed(() => {
     (!data.value || (data.value && data.value.length === 0))
   );
 });
-
-const openWalletTransfer = (walletId: string) => {
-  emit("transfer", walletId);
-};
 </script>
 
 <template>
@@ -51,6 +51,7 @@ const openWalletTransfer = (walletId: string) => {
             :key="wallet.id"
             :wallet="wallet"
             @transfer="openWalletTransfer"
+            @adjust-balance="openAdjustBalance"
           />
         </div>
       </template>

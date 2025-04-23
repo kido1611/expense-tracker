@@ -3,8 +3,8 @@ import type { FormSubmitEvent } from "#ui/types";
 
 import { format } from "date-fns";
 
-const props = defineProps<{
-  selectedWallet: string | null | undefined;
+const { selectedWalletId } = defineProps<{
+  selectedWalletId: string | null | undefined;
 }>();
 const emit = defineEmits<{
   close: [];
@@ -80,8 +80,8 @@ watch(
 );
 
 onMounted(() => {
-  if (props.selectedWallet) {
-    state.fromWalletId = props.selectedWallet;
+  if (selectedWalletId) {
+    state.fromWalletId = selectedWalletId;
   }
 });
 

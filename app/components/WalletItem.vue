@@ -1,18 +1,14 @@
 <script setup lang="ts">
-import { useWalletAdjustBalanceDialogStore } from "~/stores/wallet";
-
 const { wallet } = defineProps<{
   wallet: WalletResponse;
 }>();
 
 const emits = defineEmits<{
-  transfer: [walletNanoid: string];
+  transfer: [walletId: string];
+  adjustBalance: [walletId: string];
 }>();
 
 const toast = useToast();
-
-const walletAdjustBalanceStore = useWalletAdjustBalanceDialogStore();
-const { open: openAdjustBalance } = walletAdjustBalanceStore;
 
 const isDeleteLoading = ref<boolean>(false);
 async function deleteWallet() {
@@ -49,7 +45,7 @@ const dropdownItems = [
       label: "Adjust Balance",
       icon: "i-tabler-cash-banknote-edit",
       onSelect() {
-        openAdjustBalance(wallet.id);
+        emits("adjustBalance", wallet.id);
       },
     },
     {
