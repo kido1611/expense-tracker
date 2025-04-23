@@ -4,7 +4,10 @@ const { data, status } = await useFetch("/api/transactions", {
   query: {
     limit: 5,
   },
+  server: false,
+  lazy: true,
   deep: false,
+  dedupe: "cancel",
   transform: (value) => {
     return value.data;
   },

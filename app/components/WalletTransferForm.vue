@@ -15,8 +15,9 @@ const { isLoading, setLoading } = inject<LoadingGlobal>(LoadingGlobalKey, {
   setLoading: () => {},
 });
 
-const { data: walletsData } = await useLazyFetch("/api/wallets", {
+const { data: walletsData } = await useFetch("/api/wallets", {
   deep: false,
+  lazy: true,
   transform: (value) => {
     return value.data;
   },

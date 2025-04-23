@@ -9,12 +9,14 @@ const emit = defineEmits<{
 
 const { data: walletsData } = await useFetch("/api/wallets", {
   deep: false,
+  lazy: true,
   transform: (value) => {
     return value.data;
   },
 });
 const { data: categoriesData } = await useFetch("/api/categories", {
   deep: false,
+  lazy: true,
   transform: (value) => {
     return value.data;
   },

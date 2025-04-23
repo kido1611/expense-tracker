@@ -3,9 +3,12 @@ const emit = defineEmits<{
   transfer: [walletNanoid: string];
 }>();
 
-const { data, status } = await useLazyFetch("/api/wallets", {
+const { data, status } = await useFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
   deep: false,
+  server: false,
+  lazy: true,
+  dedupe: "cancel",
   transform: (value) => {
     return value.data;
   },
