@@ -1,6 +1,8 @@
 import { drizzle } from "drizzle-orm/d1";
-
+// import type {DrizzleD1Database} from "drizzle-orm/d1";
 import * as schema from "../database/schema";
+
+export type { DrizzleD1Database } from "drizzle-orm/d1";
 export { sql, eq, and, or } from "drizzle-orm";
 
 export const tables = schema;
@@ -14,3 +16,7 @@ export type Wallet = typeof schema.wallets.$inferSelect;
 export type Category = typeof schema.categories.$inferSelect;
 export type Transaction = typeof schema.transactions.$inferSelect;
 export type WalletTransfer = typeof schema.walletTransfers.$inferSelect;
+
+// export type DBTransaction = Parameters<
+//   Parameters<DrizzleD1Database<typeof schema>["transaction"]>[0]
+// >[0];
