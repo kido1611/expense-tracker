@@ -1,6 +1,7 @@
 <script setup lang="ts">
 const isSidebarVisible = ref(false);
 </script>
+
 <template>
   <div class="grid grid-cols-1 overflow-clip md:grid-cols-(--dashboard-layout)">
     <aside class="relative hidden h-screen overflow-hidden md:block">
@@ -25,6 +26,7 @@ const isSidebarVisible = ref(false);
     </main>
     <USlideover
       v-model:open="isSidebarVisible"
+      title="Sidebar"
       side="left"
       :ui="{ content: 'max-w-xs' }"
     >
