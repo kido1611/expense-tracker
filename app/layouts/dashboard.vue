@@ -1,36 +1,34 @@
 <script setup lang="ts">
-import type { DropdownMenuItem } from "@nuxt/ui";
+import type { DropdownMenuItem, NavigationMenuItem } from "@nuxt/ui";
 const { user, loggedIn, clear } = useUserSession();
 
-const route = useRoute();
-
-const menu = [
+const menu = ref<NavigationMenuItem[]>([
   {
-    title: "Home",
-    path: "/dashboard",
+    label: "Home",
+    to: "/dashboard",
     icon: "i-tabler-layout-dashboard",
   },
   {
-    title: "Wallets",
-    path: "/dashboard/wallets",
+    label: "Wallets",
+    to: "/dashboard/wallets",
     icon: "i-tabler-wallet",
   },
   {
-    title: "Transactions",
-    path: "/dashboard/transactions",
+    label: "Transactions",
+    to: "/dashboard/transactions",
     icon: "i-tabler-arrows-transfer-down",
   },
   {
-    title: "Categories",
-    path: "/dashboard/categories",
+    label: "Categories",
+    to: "/dashboard/categories",
     icon: "i-tabler-category",
   },
   {
-    title: "Budgets",
-    path: "/dashboard/budgets",
+    label: "Budgets",
+    to: "/dashboard/budgets",
     icon: "i-tabler-pig",
   },
-];
+]);
 
 const userMenu: DropdownMenuItem[][] = [
   [
@@ -65,19 +63,12 @@ const userMenu: DropdownMenuItem[][] = [
           </div>
           <div class="h-full overflow-y-auto overscroll-none px-4 py-2">
             <div>button add transaction // dropdown add wallet</div>
-            <NuxtLink
-              v-for="item in menu"
-              :key="item.path"
-              :data-active="item.path === route.path"
-              class="-mx-2 flex h-10 flex-row items-center gap-x-3 rounded-md px-2 text-sm font-medium text-neutral-400 hover:bg-neutral-700 data-[active=true]:text-white"
-              :to="item.path"
-            >
-              <UIcon
-                :name="item.icon"
-                class="size-6 flex-none"
-              />
-              <p :to="item.path">{{ item.title }}</p>
-            </NuxtLink>
+            <UNavigationMenu
+              :items="menu"
+              orientation="vertical"
+              class="-mx-2.5"
+              :ui="{ link: 'py-2' }"
+            />
           </div>
           <div class="border-t border-neutral-700 px-2 py-2">
             <template v-if="loggedIn">
