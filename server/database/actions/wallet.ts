@@ -40,7 +40,7 @@ export async function updateUserWalletBalance(
     );
 }
 
-export async function updateUserWalletRelativeBalance(
+export async function updateWalletRelativeBalance(
   db: DrizzleDatabase,
   walletId: string,
   balance: number,

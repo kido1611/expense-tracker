@@ -4,7 +4,7 @@ import {
   getWalletTransferByTransactionId,
   getUserTransactionByIds,
   deleteUserTransactionsByIds,
-  updateUserWalletRelativeBalance,
+  updateWalletRelativeBalance,
   deleteWalletTransfer,
   removeFeeWalletTransfer,
 } from "~~/server/database/actions";
@@ -89,7 +89,7 @@ export default defineEventHandler(async (event: H3Event) => {
   await deleteUserTransactionsByIds(db, user.id, deletedTransactionsIds);
 
   for (const [key, value] of updateWallets) {
-    await updateUserWalletRelativeBalance(db, key, value);
+    await updateWalletRelativeBalance(db, key, value);
   }
 
   for (const path of imagePaths) {
