@@ -10,6 +10,7 @@ export default defineNuxtConfig({
     "@nuxt/test-utils/module",
     "@pinia/nuxt",
     "@vueuse/nuxt",
+    "nuxt-security",
   ],
   future: {
     compatibilityVersion: 4,
