@@ -30,10 +30,11 @@ export async function getUserTransactionById(
 }
 
 export async function getUserTransactionByIds(
+  db: DrizzleDatabase,
   userId: string,
   transactionIds: string[],
 ) {
-  const transactions = await useDrizzle().query.transactions.findMany({
+  const transactions = await db.query.transactions.findMany({
     where: and(
       eq(tables.transactions.userId, userId),
       inArray(tables.transactions.id, transactionIds),
@@ -138,10 +139,11 @@ export async function getUserTransactions(
 }
 
 export async function deleteUserTransactionsByIds(
+  db: DrizzleDatabase,
   userId: string,
   transactionIds: string[],
 ) {
-  await useDrizzle()
+  await db
     .delete(tables.transactions)
     .where(
       and(
