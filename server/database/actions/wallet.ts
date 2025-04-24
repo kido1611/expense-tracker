@@ -40,6 +40,21 @@ export async function updateUserWalletBalance(
     );
 }
 
+export async function updateUserWalletRelativeBalance(
+  userId: string,
+  walletId: string,
+  balance: number,
+) {
+  await useDrizzle()
+    .update(tables.wallets)
+    .set({
+      balance: sql`${tables.wallets.balance} + ${balance}`,
+    })
+    .where(
+      and(eq(tables.wallets.id, walletId), eq(tables.wallets.userId, userId)),
+    );
+}
+
 export async function deleteUserWalletById(userId: string, walletId: string) {
   const result = await useDrizzle()
     .delete(tables.wallets)

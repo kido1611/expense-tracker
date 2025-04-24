@@ -1,4 +1,4 @@
-import { desc, eq, aliasedTable } from "drizzle-orm";
+import { desc, eq, aliasedTable, inArray } from "drizzle-orm";
 
 export async function createUserTransaction(data: TransactionInsert) {
   const [transaction] = await createUserTransactions([data]);
@@ -27,6 +27,20 @@ export async function getUserTransactionById(
   });
 
   return transaction;
+}
+
+export async function getUserTransactionByIds(
+  userId: string,
+  transactionIds: string[],
+) {
+  const transactions = await useDrizzle().query.transactions.findMany({
+    where: and(
+      eq(tables.transactions.userId, userId),
+      inArray(tables.transactions.id, transactionIds),
+    ),
+  });
+
+  return transactions;
 }
 
 export async function removeTransactionImageById(transactionId: string) {
@@ -72,7 +86,6 @@ export async function getUserTransactions(
       amount: tables.transactions.amount,
       note: tables.transactions.note,
       image_path: tables.transactions.imagePath,
-      // tables.transactions.imagePath,
       spend_at: tables.transactions.spendAt,
       is_visible_in_report: tables.transactions.isVisibleInReport,
       created_at: tables.transactions.createdAt,
@@ -114,12 +127,26 @@ export async function getUserTransactions(
     )
     .where(eq(tables.transactions.userId, userId))
     .orderBy(
-      desc(tables.transactions.spendAt),
       desc(tables.transactions.createdAt),
+      desc(tables.transactions.spendAt),
       desc(tables.transactions.id),
     )
     .limit(pagination.limit)
     .offset(pagination.limit * (pagination.page - 1));
 
   return transactions;
+}
+
+export async function deleteUserTransactionsByIds(
+  userId: string,
+  transactionIds: string[],
+) {
+  await useDrizzle()
+    .delete(tables.transactions)
+    .where(
+      and(
+        eq(tables.transactions.userId, userId),
+        inArray(tables.transactions.id, transactionIds),
+      ),
+    );
 }
