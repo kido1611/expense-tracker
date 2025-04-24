@@ -44,6 +44,9 @@ export default defineEventHandler(
     const spendDate = parseISO(validatedBody.spendAt);
     const result = await createUserTransaction({
       ...validatedBody,
+      amount: category.isExpense
+        ? validatedBody.amount * -1
+        : validatedBody.amount,
       spendAt: spendDate,
       userId: user.id,
     });
