@@ -42,4 +42,12 @@ export default defineNuxtConfig({
   pinia: {
     storesDirs: ["./app/stores/**"],
   },
+  security: {
+    headers: {
+      contentSecurityPolicy: {
+        "img-src": ["'self'", "data:", "https://ui-avatars.com"],
+      },
+    },
+  },
 });
+
