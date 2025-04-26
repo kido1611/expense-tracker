@@ -18,10 +18,7 @@ async function deleteWallet() {
       method: "DELETE",
     });
 
-    await refreshNuxtData([
-      INDEX_WALLETS_CACHE_KEY_NAME,
-      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
-    ]);
+    await refreshNuxtData(DASHBOARD_INDEX_CACHE_KEYS);
 
     toast.add({
       title: "Success delete wallet",

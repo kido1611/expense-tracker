@@ -74,10 +74,7 @@ async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
       inputPhoto.value.value = "";
     }
 
-    await refreshNuxtData([
-      INDEX_WALLETS_CACHE_KEY_NAME,
-      INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
-    ]);
+    await refreshNuxtData(DASHBOARD_INDEX_CACHE_KEYS);
 
     emit("close");
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
