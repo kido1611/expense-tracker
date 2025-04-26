@@ -1,25 +1,22 @@
 <script setup lang="ts">
 const { isLoading } = useLoading();
 
-const open = ref<boolean>(false);
+const store = useTransactionDialogStore();
+const { isVisible } = storeToRefs(store);
+const { close } = store;
 </script>
 
 <template>
   <USlideover
-    v-model:open="open"
+    v-model:open="isVisible"
     :dismissible="!isLoading"
     :close="!isLoading"
     title="Add Transaction"
   >
-    <UButton
-      type="button"
-      icon="i-tabler-plus"
-      >Add Transaction</UButton
-    >
     <template #body>
       <LazyTransactionForm
         hydrate-on-visible
-        @close="open = false"
+        @close="close"
       />
     </template>
   </USlideover>

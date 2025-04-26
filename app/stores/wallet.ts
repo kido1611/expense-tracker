@@ -46,3 +46,21 @@ export const useWalletTransferDialogStore = defineStore(
     };
   },
 );
+
+export const useWalletDialogStore = defineStore("wallet-dialog", () => {
+  const isVisible = ref<boolean>(false);
+
+  const open = () => {
+    isVisible.value = true;
+  };
+
+  const close = () => {
+    isVisible.value = false;
+  };
+
+  return {
+    isVisible,
+    open,
+    close,
+  };
+});

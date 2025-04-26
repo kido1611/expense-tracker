@@ -1,25 +1,24 @@
 <script setup lang="ts">
+import { useWalletDialogStore } from "~/stores/wallet";
+
 const { isLoading } = useLoading();
 
-const open = ref(false);
+const store = useWalletDialogStore();
+const { isVisible } = storeToRefs(store);
+const { close } = store;
 </script>
 
 <template>
   <USlideover
-    v-model:open="open"
+    v-model:open="isVisible"
     :dismissible="!isLoading"
     :close="!isLoading"
     title="Add Wallet"
   >
-    <UButton
-      type="button"
-      icon="i-tabler-plus"
-      >Add Wallet</UButton
-    >
     <template #body>
       <LazyWalletForm
         hydrate-on-visible
-        @close="open = false"
+        @close="close"
       />
     </template>
   </USlideover>

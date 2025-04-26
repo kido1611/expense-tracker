@@ -15,11 +15,6 @@ const { close } = store;
     :close="!isLoading"
     title="Transfer Wallet"
   >
-    <UButton
-      type="button"
-      icon="i-tabler-transfer"
-      >Transfer Wallet</UButton
-    >
     <template #body>
       <LazyWalletTransferForm
         hydrate-on-visible
