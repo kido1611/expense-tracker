@@ -33,6 +33,13 @@ const menu = ref<NavigationMenuItem[]>([
 const userMenu: DropdownMenuItem[][] = [
   [
     {
+      label: "Profile",
+      icon: "i-tabler-user",
+    },
+    {
+      type: "separator",
+    },
+    {
       label: "Logout",
       icon: "i-tabler-logout",
       async onSelect() {
@@ -51,18 +58,20 @@ const userMenu: DropdownMenuItem[][] = [
 </script>
 
 <template>
-  <div class="grid h-screen grid-cols-1 grid-rows-(--dashboard-sidebar-layout)">
-    <div class="h-16 border border-red-300 px-4 py-2">Expense Tracker</div>
-    <div class="h-full overflow-y-auto overscroll-none px-4 py-2">
-      <div>button add transaction // dropdown add wallet</div>
+  <div class="grid h-dvh grid-cols-1 grid-rows-(--dashboard-sidebar-layout)">
+    <div class="flex h-18 items-center px-4">
+      <p class="font-kalam text-2xl font-semibold">Expense Tracker</p>
+    </div>
+    <div class="h-full overflow-y-auto overscroll-none px-4">
+      <!-- <div>button add transaction // dropdown add wallet</div> -->
       <UNavigationMenu
         :items="menu"
         orientation="vertical"
         class="-mx-2.5"
-        :ui="{ link: 'py-2' }"
+        :ui="{ link: 'py-2.5' }"
       />
     </div>
-    <div class="border-t border-neutral-700 px-2 py-2">
+    <div class="border-t border-neutral-700 px-1.5 py-2">
       <template v-if="loggedIn">
         <UDropdownMenu
           :items="userMenu"
@@ -72,22 +81,29 @@ const userMenu: DropdownMenuItem[][] = [
             side: 'top',
             sideOffset: 8,
           }"
+          :ui="{
+            content: 'min-w-52',
+          }"
         >
           <button
-            class="flex h-10 w-full flex-row items-center justify-center rounded-md px-2 text-left hover:bg-neutral-700"
+            class="flex h-14 w-full flex-row items-center justify-center rounded-md px-2.5 text-left hover:bg-neutral-700"
           >
             <!-- eslint-disable-next-line vue/html-self-closing -->
             <img
               loading="lazy"
               :src="`https://ui-avatars.com/api/?name=${user?.name}`"
-              class="size-8 flex-none rounded-full bg-red-200"
+              class="size-9 flex-none rounded-md bg-red-200"
             />
-            <div class="ml-3 flex flex-1 flex-col">
+            <div class="ml-2.5 flex flex-1 flex-col">
               <p class="text-sm font-medium">
                 {{ user?.name }}
               </p>
               <p class="text-xs text-neutral-400">{{ user?.email }}</p>
             </div>
+            <UIcon
+              name="i-tabler-selector"
+              class="size-4 flex-none"
+            />
           </button>
         </UDropdownMenu>
       </template>
