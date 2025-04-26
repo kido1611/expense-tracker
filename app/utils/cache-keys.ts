@@ -3,6 +3,13 @@ import type { NuxtApp } from "#app";
 export const INDEX_WALLETS_CACHE_KEY_NAME = "index-wallets";
 export const INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME =
   "index-latest-transactions";
+export const CATEGORIES_CACHE_KEY_NAME = "categories_cache";
+export const DASHBOARD_TOTAL_INCOME_TILE_THIS_MONTH_CACHE_KEY_NAME =
+  "dashboard_total_income_tile_this_month_cache_key_name";
+export const DASHBOARD_TOTAL_EXPENSE_TILE_THIS_MONTH_CACHE_KEY_NAME =
+  "dashboard_total_expense_tile_this_month_cache_key_name";
+export const DASHBOARD_TOTAL_BALANCE_TILE_CACHE_KEY_NAME =
+  "dashboard_total_balance_tile_cache_key_name";
 
 
 export function getFetchCache<Type>(
