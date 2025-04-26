@@ -3,10 +3,17 @@ type Props = {
   title: string;
   value: string;
   icon?: string;
-  isLoading: boolean;
+  isLoading?: boolean;
+  isError?: boolean;
 };
 
-const { title, value, icon, isLoading } = defineProps<Props>();
+const {
+  title,
+  value,
+  icon,
+  isLoading = false,
+  isError = false,
+} = defineProps<Props>();
 </script>
 
 <template>
@@ -22,6 +29,7 @@ const { title, value, icon, isLoading } = defineProps<Props>();
     <p
       v-if="!isLoading"
       class="mt-3 text-2xl font-semibold tabular-nums"
+      :class="{ 'text-red-500': isError }"
     >
       {{ value }}
     </p>
