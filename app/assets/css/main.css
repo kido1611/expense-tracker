@@ -5,4 +5,7 @@
   --dashboard-sidebar-width: 278px;
   --dashboard-layout: var(--dashboard-sidebar-width) minmax(400px, 1fr);
   --dashboard-sidebar-layout: auto 1fr auto;
+
+  --font-kalam: "Kalam", cursive;
+  --font-noto-sans: "Noto Sans", sans-serif;
 }

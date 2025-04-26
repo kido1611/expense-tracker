@@ -1,27 +1,37 @@
 <script setup lang="ts">
 const isSidebarVisible = ref(false);
+
+const route = useRoute();
+useHead({
+  title: `${route.meta.title}`,
+});
 </script>
 
 <template>
   <div class="grid grid-cols-1 overflow-clip md:grid-cols-(--dashboard-layout)">
-    <aside class="relative hidden h-screen overflow-hidden md:block">
+    <aside class="relative hidden h-dvh overflow-hidden md:block">
       <div
-        class="fixed inset-0 h-screen max-w-(--dashboard-sidebar-width) overflow-hidden bg-neutral-800"
+        class="fixed inset-0 h-dvh max-w-(--dashboard-sidebar-width) overflow-hidden bg-neutral-800"
       >
         <DashboardSidebarContent />
       </div>
     </aside>
     <main>
-      <div class="px-4 py-2">
+      <UContainer
+        class="flex h-16 flex-row items-center border-b border-neutral-800 px-4"
+      >
         <UButton
           icon="i-tabler-menu-2"
           color="neutral"
           variant="outline"
-          size="md"
-          class="md:hidden"
+          size="lg"
+          class="mr-4 flex-none md:hidden"
           @click="isSidebarVisible = !isSidebarVisible"
         />
-      </div>
+        <p class="font-noto-sans text-xl font-medium">
+          {{ route.meta.title }}
+        </p>
+      </UContainer>
       <slot />
     </main>
     <USlideover
@@ -38,7 +48,7 @@ const isSidebarVisible = ref(false);
             color="neutral"
             variant="ghost"
             size="md"
-            class="absolute top-2 right-2"
+            class="absolute top-3 right-3"
             @click="isSidebarVisible = false"
           />
         </div>
