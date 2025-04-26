@@ -8,17 +8,31 @@ const emit = defineEmits<{
 }>();
 
 const { data: walletsData } = await useFetch("/api/wallets", {
+  key: INDEX_WALLETS_CACHE_KEY_NAME,
   deep: false,
   lazy: true,
   transform: (value) => {
-    return value.data;
+    return {
+      data: value.data,
+      fetched_at: new Date(),
+    };
+  },
+  getCachedData(key, nuxtApp) {
+    return getFetchCache(key, nuxtApp);
   },
 });
 const { data: categoriesData } = await useFetch("/api/categories", {
+  key: CATEGORIES_CACHE_KEY_NAME,
   deep: false,
   lazy: true,
   transform: (value) => {
-    return value.data;
+    return {
+      data: value.data,
+      fetched_at: new Date(),
+    };
+  },
+  getCachedData(key, nuxtApp) {
+    return getFetchCache(key, nuxtApp);
   },
 });
 
@@ -111,7 +125,7 @@ const selectedCategory = computed(() => {
     return null;
   }
 
-  return categoriesData.value?.filter(
+  return categoriesData.value?.data?.filter(
     (data) => data.id === state.categoryId,
   )[0];
 });
@@ -121,7 +135,9 @@ const selectedWallet = computed(() => {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.walletId)[0];
+  return walletsData.value?.data?.filter(
+    (data) => data.id === state.walletId,
+  )[0];
 });
 
 async function onFileSelect(event: Event) {
@@ -151,7 +167,7 @@ async function onFileSelect(event: Event) {
         value-key="id"
         label-key="name"
         :icon="selectedWallet?.icon ?? undefined"
-        :items="walletsData"
+        :items="walletsData?.data"
         required
         :disabled="isLoading"
         placeholder="Find wallet..."
@@ -197,7 +213,7 @@ async function onFileSelect(event: Event) {
         v-model="state.categoryId"
         value-key="id"
         label-key="name"
-        :items="categoriesData"
+        :items="categoriesData?.data"
         required
         :disabled="isLoading"
         placeholder="Find category..."

@@ -14,10 +14,17 @@ const { isLoading, setLoading } = useLoading();
 const toast = useToast();
 
 const { data: walletsData } = await useFetch("/api/wallets", {
+  key: INDEX_WALLETS_CACHE_KEY_NAME,
   deep: false,
   lazy: true,
   transform: (value) => {
-    return value.data;
+    return {
+      data: value.data,
+      fetched_at: new Date(),
+    };
+  },
+  getCachedData(key, nuxtApp) {
+    return getFetchCache(key, nuxtApp);
   },
 });
 
@@ -36,14 +43,18 @@ const selectedFromWallet = computed(() => {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.fromWalletId)[0];
+  return walletsData.value?.data?.filter(
+    (data) => data.id === state.fromWalletId,
+  )[0];
 });
 const selectedToWallet = computed(() => {
   if (!state.toWalletId) {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.toWalletId)[0];
+  return walletsData.value?.data?.filter(
+    (data) => data.id === state.toWalletId,
+  )[0];
 });
 
 const fromWalletList = computed(() => {
@@ -51,7 +62,7 @@ const fromWalletList = computed(() => {
     return [];
   }
 
-  return walletsData.value ?? [];
+  return walletsData.value.data ?? [];
 });
 
 const toWalletsList = computed(() => {

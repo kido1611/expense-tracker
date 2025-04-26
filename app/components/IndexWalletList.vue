@@ -14,14 +14,20 @@ const { data, status } = await useFetch("/api/wallets", {
   lazy: true,
   dedupe: "cancel",
   transform: (value) => {
-    return value.data;
+    return {
+      data: value.data,
+      fetched_at: new Date(),
+    };
+  },
+  getCachedData(key, nuxtApp) {
+    return getFetchCache(key, nuxtApp);
   },
 });
 
 const isSkeletonVisible = computed(() => {
   return (
     status.value === "pending" &&
-    (!data.value || (data.value && data.value.length === 0))
+    (!data.value || (data.value && data.value.data?.length === 0))
   );
 });
 </script>
@@ -42,12 +48,12 @@ const isSkeletonVisible = computed(() => {
     </template>
 
     <template v-else>
-      <template v-if="data && data.length > 0">
+      <template v-if="data && (data.data?.length ?? 0) > 0">
         <div
           class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
         >
           <WalletItem
-            v-for="wallet in data"
+            v-for="wallet in data.data"
             :key="wallet.id"
             :wallet="wallet"
             @transfer="openWalletTransfer"

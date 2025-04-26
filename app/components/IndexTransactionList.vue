@@ -2,21 +2,27 @@
 const { data, status } = await useFetch("/api/transactions", {
   key: INDEX_LATEST_TRANSACTIONS_CACHE_KEY_NAME,
   query: {
-    limit: 5,
+    limit: 7,
   },
   server: false,
   lazy: true,
   deep: false,
   dedupe: "cancel",
   transform: (value) => {
-    return value.data;
+    return {
+      data: value.data,
+      fetched_at: new Date(),
+    };
+  },
+  getCachedData(key, nuxtApp) {
+    return getFetchCache(key, nuxtApp);
   },
 });
 
 const isSkeletonVisible = computed(() => {
   return (
     status.value === "pending" &&
-    (!data.value || (data.value && data.value.length === 0))
+    (!data.value || (data.value && data.value.data?.length === 0))
   );
 });
 </script>
@@ -37,12 +43,12 @@ const isSkeletonVisible = computed(() => {
     </template>
 
     <template v-else>
-      <template v-if="data && data.length > 0">
+      <template v-if="data?.data && data.data?.length > 0">
         <div
           class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
         >
           <TransactionItem
-            v-for="transaction in data"
+            v-for="transaction in data.data"
             :key="transaction.id"
             :transaction="transaction"
             :show-note="false"
