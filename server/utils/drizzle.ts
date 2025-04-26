@@ -3,7 +3,7 @@ import type { DrizzleD1Database } from "drizzle-orm/d1";
 import * as schema from "../database/schema";
 
 export type { DrizzleD1Database } from "drizzle-orm/d1";
-export { sql, eq, and, or } from "drizzle-orm";
+export { sql, eq, and, or, gte, lt } from "drizzle-orm";
 
 export const tables = schema;
 
