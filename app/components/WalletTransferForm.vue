@@ -127,7 +127,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
   >
     <UFormField
       label="From"
-      name="fromWalletNanoid"
+      name="fromWalletId"
       required
     >
       <USelectMenu
@@ -175,7 +175,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     </UFormField>
     <UFormField
       label="To"
-      name="toWalletNanoid"
+      name="toWalletId"
       required
     >
       <USelectMenu

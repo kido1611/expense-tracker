@@ -138,7 +138,7 @@ async function onFileSelect(event: Event) {
   >
     <UFormField
       label="Wallet"
-      name="walletNanoid"
+      name="walletId"
       required
     >
       <!-- TODO: save last selected wallet -->
