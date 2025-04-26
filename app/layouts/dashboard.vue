@@ -2,9 +2,6 @@
 const isSidebarVisible = ref(false);
 
 const route = useRoute();
-useHead({
-  title: `${route.meta.title}`,
-});
 </script>
 
 <template>
@@ -33,6 +30,10 @@ useHead({
         </p>
       </UContainer>
       <slot />
+
+      <WalletSlideover />
+      <TransactionSlideover />
+      <WalletTransferSlideover />
     </main>
     <USlideover
       v-model:open="isSidebarVisible"

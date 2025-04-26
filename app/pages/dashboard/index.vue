@@ -8,12 +8,6 @@ definePageMeta({
 
 <template>
   <UContainer class="py-8">
-    <div class="mb-6 flex flex-row flex-wrap gap-4">
-      <WalletSlideover />
-      <TransactionSlideover />
-      <WalletTransferSlideover />
-    </div>
-
     <div class="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
       <LazyDashboardTotalBalanceTile hydrate-on-idle />
     </div>

@@ -63,7 +63,7 @@ const userMenu: DropdownMenuItem[][] = [
       <p class="font-kalam text-2xl font-semibold">Expense Tracker</p>
     </div>
     <div class="h-full overflow-y-auto overscroll-none px-4">
-      <!-- <div>button add transaction // dropdown add wallet</div> -->
+      <AddButton class="mb-4 w-full" />
       <UNavigationMenu
         :items="menu"
         orientation="vertical"
