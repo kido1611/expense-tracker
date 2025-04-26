@@ -22,7 +22,6 @@
     "@vueuse/nuxt": "13.1.0",
     "date-fns": "^4.1.0",
     "drizzle-orm": "^0.42.0",
-    "nanoid": "^5.1.5",
     "nuxt": "^3.16.2",
     "nuxt-auth-utils": "^0.5.20",
     "nuxt-security": "2.2.0",
