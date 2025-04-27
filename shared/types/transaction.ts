@@ -16,7 +16,6 @@ export const TransactionCreateSchema = z.object({
     const parsedDate = parseISO(value);
     return isValid(parsedDate);
   }, "Date invalid"),
-  // transactionAt: z.iso.datetime({ local: true }),
   isVisibleInReport: z.boolean().default(true),
 });
 

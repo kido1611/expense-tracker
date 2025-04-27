@@ -14,9 +14,6 @@ export const WalletTransferCreateSchema = z.object({
     const parsedDate = parseISO(value);
     return isValid(parsedDate);
   }, "Date invalid"),
-  // transferAt: z.iso.datetime({
-  //   local: true,
-  // }),
   withFee: z.coerce.boolean().nullish().default(false),
   feeAmount: z.coerce.number().gte(0),
 });
