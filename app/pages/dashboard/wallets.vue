@@ -2,6 +2,10 @@
 definePageMeta({
   middleware: ["auth"],
   layout: "dashboard",
+  title: "Wallets",
+});
+useHead({
+  title: "Wallets",
 });
 </script>
 <template>

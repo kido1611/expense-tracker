@@ -4,6 +4,9 @@ definePageMeta({
   layout: "dashboard",
   title: "Home",
 });
+useHead({
+  title: "Home",
+});
 </script>
 
 <template>
