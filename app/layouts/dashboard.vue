@@ -1,7 +1,9 @@
 <script setup lang="ts">
-const isSidebarVisible = ref(false);
-
 const route = useRoute();
+
+const sidebarStore = useDashboardSidebarStore();
+const { isVisible: isSidebarVisible } = storeToRefs(sidebarStore);
+const { toggle: toggleSidebar, close: closeSidebar } = sidebarStore;
 </script>
 
 <template>
@@ -23,7 +25,7 @@ const route = useRoute();
           variant="outline"
           size="lg"
           class="mr-4 flex-none md:hidden"
-          @click="isSidebarVisible = !isSidebarVisible"
+          @click="toggleSidebar"
         />
         <p class="font-noto-sans text-xl font-medium">
           {{ route.meta.title }}
@@ -50,7 +52,7 @@ const route = useRoute();
             variant="ghost"
             size="md"
             class="absolute top-3 right-3"
-            @click="isSidebarVisible = false"
+            @click="closeSidebar"
           />
         </div>
       </template>

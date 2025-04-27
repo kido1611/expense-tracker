@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import type { DropdownMenuItem } from "@nuxt/ui";
 
+const sidebarStore = useDashboardSidebarStore();
+const { close: closeSidebar } = sidebarStore;
+
 const walletTransferStore = useWalletTransferDialogStore();
 const { open: openWalletTransfer } = walletTransferStore;
 
@@ -16,6 +19,7 @@ const otherMenu: DropdownMenuItem[] = [
     icon: "i-tabler-wallet",
     onSelect() {
       openWallet();
+      closeSidebar();
     },
   },
   {
@@ -23,9 +27,15 @@ const otherMenu: DropdownMenuItem[] = [
     icon: "i-tabler-credit-card-pay",
     onSelect() {
       openWalletTransfer(null);
+      closeSidebar();
     },
   },
 ];
+
+const openTransactionButton = () => {
+  openTransaction();
+  closeSidebar();
+};
 </script>
 
 <template>
@@ -34,7 +44,7 @@ const otherMenu: DropdownMenuItem[] = [
       class="h-12 w-full justify-center"
       icon="i-tabler-plus"
       color="info"
-      @click="openTransaction"
+      @click="openTransactionButton"
     >
       Transaction
     </UButton>
