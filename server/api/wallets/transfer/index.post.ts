@@ -77,7 +77,7 @@ export default defineEventHandler(
         categoryId: outcomeTransferCategory.id,
         amount: validatedBody.amount * -1,
         isVisibleInReport: false,
-        spendAt: transferDate,
+        transactionAt: transferDate,
         note: validatedBody.note,
       },
       {
@@ -86,7 +86,7 @@ export default defineEventHandler(
         categoryId: incomeTransferCategory.id,
         amount: validatedBody.amount,
         isVisibleInReport: false,
-        spendAt: transferDate,
+        transactionAt: transferDate,
         note: validatedBody.note,
       },
     ];
@@ -105,7 +105,7 @@ export default defineEventHandler(
           categoryId: otherTransferCategory.id,
           amount: validatedBody.feeAmount * -1,
           isVisibleInReport: true,
-          spendAt: transferDate,
+          transactionAt: transferDate,
           note: "Transfer Fee",
         });
       }

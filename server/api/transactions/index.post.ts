@@ -41,13 +41,13 @@ export default defineEventHandler(
       });
     }
 
-    const spendDate = parseISO(validatedBody.spendAt);
+    const transactionDate = parseISO(validatedBody.transactionAt);
     const result = await createUserTransaction({
       ...validatedBody,
       amount: category.isExpense
         ? validatedBody.amount * -1
         : validatedBody.amount,
-      spendAt: spendDate,
+      transactionAt: transactionDate,
       userId: user.id,
     });
 
@@ -67,7 +67,7 @@ export default defineEventHandler(
         amount: result.amount,
         note: result.note,
         image_path: result.imagePath,
-        spend_at: result.spendAt,
+        transaction_at: result.transactionAt,
         is_visible_in_report: result.isVisibleInReport,
         is_wallet_transfer: false,
         created_at: result.createdAt,

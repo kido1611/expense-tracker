@@ -26,7 +26,7 @@ const state = reactive({
   toWalletId: "",
   amount: 0,
   note: "",
-  transferAt: format(new Date(), "yyyy-MM-dd"),
+  transferAt: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
   withFee: false,
   feeAmount: 0,
 });
@@ -98,7 +98,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     state.toWalletId = "";
     state.amount = 0;
     state.note = "";
-    state.transferAt = format(new Date(), "yyyy-MM-dd");
+    state.transferAt = format(new Date(), "yyyy-MM-dd't'HH:mm");
     state.withFee = false;
     state.feeAmount = 0;
 
@@ -125,6 +125,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     class="mx-auto flex max-w-md flex-col space-y-5"
     @submit="onSubmit"
   >
+    {{ state }}
     <UFormField
       label="From"
       name="fromWalletId"
@@ -247,7 +248,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     >
       <UInput
         v-model="state.transferAt"
-        type="date"
+        type="datetime-local"
         required
         :disabled="isLoading"
       />

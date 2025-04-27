@@ -31,7 +31,7 @@ const state = reactive({
   walletId: "",
   categoryId: "",
   amount: 0,
-  spendAt: format(new Date(), "yyyy-MM-dd"),
+  transactionAt: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
   note: "",
   isVisibleInReport: true,
 });
@@ -51,7 +51,7 @@ async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
     state.walletId = "";
     state.categoryId = "";
     state.amount = 0;
-    state.spendAt = format(new Date(), "yyyy-MM-dd");
+    state.transactionAt = format(new Date(), "yyyy-MM-dd'T'HH:mm");
     state.note = "";
     state.isVisibleInReport = true;
     statePhoto.value = null;
@@ -266,13 +266,13 @@ async function onFileSelect(event: Event) {
       />
     </UFormField>
     <UFormField
-      label="Transaction at"
-      name="spendAt"
+      label="Date"
+      name="transactionAt"
       required
     >
       <UInput
-        v-model="state.spendAt"
-        type="date"
+        v-model="state.transactionAt"
+        type="datetime-local"
         required
         :disabled="isLoading"
       />

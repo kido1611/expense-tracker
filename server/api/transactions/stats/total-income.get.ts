@@ -24,8 +24,8 @@ export default defineEventHandler(
           eq(tables.transactions.userId, user.id),
           eq(tables.categories.isExpense, false),
           eq(tables.transactions.isVisibleInReport, true),
-          gte(tables.transactions.spendAt, startMonth),
-          lt(tables.transactions.spendAt, endMonth),
+          gte(tables.transactions.transactionAt, startMonth),
+          lt(tables.transactions.transactionAt, endMonth),
         ),
       );
 

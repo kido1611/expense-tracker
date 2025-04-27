@@ -132,7 +132,9 @@ export const transactions = sqliteTable(
       .notNull()
       .default(true),
 
-    spendAt: integer("spend_at", { mode: "timestamp_ms" }).notNull(),
+    transactionAt: integer("transaction_at", {
+      mode: "timestamp_ms",
+    }).notNull(),
 
     createdAt: createdAt,
     updatedAt: updatedAt,

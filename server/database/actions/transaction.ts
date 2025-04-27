@@ -87,7 +87,7 @@ export async function getUserTransactions(
       amount: tables.transactions.amount,
       note: tables.transactions.note,
       image_path: tables.transactions.imagePath,
-      spend_at: tables.transactions.spendAt,
+      transaction_at: tables.transactions.transactionAt,
       is_visible_in_report: tables.transactions.isVisibleInReport,
       created_at: tables.transactions.createdAt,
       is_wallet_transfer: sql<boolean>`${sourceWalletTransfer.sourceTransactionId} is not null or ${targetWalletTransfer.targetTransactionId} is not null or ${feeWalletTransfer.feeTransactionId} is not null`,
@@ -128,8 +128,8 @@ export async function getUserTransactions(
     )
     .where(eq(tables.transactions.userId, userId))
     .orderBy(
+      desc(tables.transactions.transactionAt),
       desc(tables.transactions.createdAt),
-      desc(tables.transactions.spendAt),
       desc(tables.transactions.id),
     )
     .limit(pagination.limit)

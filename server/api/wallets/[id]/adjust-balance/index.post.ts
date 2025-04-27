@@ -49,7 +49,7 @@ export default defineEventHandler(
         categoryId: category.id,
         amount: balanceDiff,
         isVisibleInReport: true,
-        spendAt: new Date(),
+        transactionAt: new Date(),
         note: null,
       });
 

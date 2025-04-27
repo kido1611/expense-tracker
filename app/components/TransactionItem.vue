@@ -15,9 +15,9 @@ const realAmount = computed(() => {
 
 const isoDate = computed(() => {
   const date =
-    transaction.spend_at instanceof Date
-      ? transaction.spend_at
-      : parseISO(transaction.spend_at);
+    transaction.transaction_at instanceof Date
+      ? transaction.transaction_at
+      : parseISO(transaction.transaction_at);
   return format(date, "d MMMM yyyy", {
     locale: id,
   });

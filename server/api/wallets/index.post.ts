@@ -27,7 +27,7 @@ export default defineEventHandler(
           categoryId: category.id,
           amount: validatedBody.balance,
           isVisibleInReport: true,
-          spendAt: new Date(),
+          transactionAt: new Date(),
           note: null,
         });
       }
