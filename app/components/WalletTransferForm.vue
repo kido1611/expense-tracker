@@ -125,7 +125,6 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     class="mx-auto flex max-w-md flex-col space-y-5"
     @submit="onSubmit"
   >
-    {{ state }}
     <UFormField
       label="From"
       name="fromWalletId"
