@@ -94,11 +94,11 @@ const userMenu: DropdownMenuItem[][] = [
               :src="`https://ui-avatars.com/api/?name=${user?.name}`"
               class="size-9 flex-none rounded-md bg-red-200"
             />
-            <div class="ml-2.5 flex flex-1 flex-col">
-              <p class="text-sm font-medium">
+            <div class="mx-2.5 flex w-full flex-col">
+              <p class="max-w-40 truncate text-sm font-medium">
                 {{ user?.name }}
               </p>
-              <p class="text-xs text-neutral-400">{{ user?.email }}</p>
+              <p class="max-w-40 text-xs text-neutral-400">{{ user?.email }}</p>
             </div>
             <UIcon
               name="i-tabler-selector"
