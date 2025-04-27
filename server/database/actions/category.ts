@@ -30,6 +30,7 @@ export async function getUserCategories(userId: string) {
     .select({
       id: tables.categories.id,
       name: tables.categories.name,
+      icon: tables.categories.icon,
       is_expense: tables.categories.isExpense,
       created_at: tables.categories.createdAt,
     })
