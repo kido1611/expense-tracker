@@ -51,17 +51,15 @@ export const wallets = sqliteTable(
     disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
     deletedAt: deletedAt,
   },
-  (table) => {
-    return {
-      userIdIdx: index("wallets_user_id_idx").on(table.userId),
-      nameIdx: index("wallets_name_idx").on(table.name),
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [users.id],
-        name: "wallets_user_id_foreign",
-      }).onDelete("cascade"),
-    };
-  },
+  (table) => [
+    index("wallets_user_id_idx").on(table.userId),
+    index("wallets_name_idx").on(table.name),
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "wallets_user_id_foreign",
+    }).onDelete("cascade"),
+  ],
 );
 
 export const budgets = sqliteTable(
@@ -73,15 +71,13 @@ export const budgets = sqliteTable(
     createdAt: createdAt,
     updatedAt: updatedAt,
   },
-  (table) => {
-    return {
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [users.id],
-        name: "budgets_user_id_foreign",
-      }).onDelete("cascade"),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "budgets_user_id_foreign",
+    }).onDelete("cascade"),
+  ],
 );
 
 export const categories = sqliteTable(
@@ -101,15 +97,13 @@ export const categories = sqliteTable(
     createdAt: createdAt,
     updatedAt: updatedAt,
   },
-  (table) => {
-    return {
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [users.id],
-        name: "categories_user_id_foreign",
-      }).onDelete("cascade"),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "categories_user_id_foreign",
+    }).onDelete("cascade"),
+  ],
 );
 
 export const transactions = sqliteTable(
@@ -139,30 +133,28 @@ export const transactions = sqliteTable(
     createdAt: createdAt,
     updatedAt: updatedAt,
   },
-  (table) => {
-    return {
-      userReference: foreignKey({
-        columns: [table.userId],
-        foreignColumns: [users.id],
-        name: "transactions_user_id_foreign",
-      }).onDelete("cascade"),
-      walletReference: foreignKey({
-        columns: [table.walletId],
-        foreignColumns: [wallets.id],
-        name: "transactions_wallet_id_foreign",
-      }).onDelete("cascade"),
-      categoryReference: foreignKey({
-        columns: [table.categoryId],
-        foreignColumns: [categories.id],
-        name: "transactions_category_id_foreign",
-      }).onDelete("cascade"),
-      budgetReference: foreignKey({
-        columns: [table.budgetId],
-        foreignColumns: [budgets.id],
-        name: "transactions_budget_id_foreign",
-      }).onDelete("set null"),
-    };
-  },
+  (table) => [
+    foreignKey({
+      columns: [table.userId],
+      foreignColumns: [users.id],
+      name: "transactions_user_id_foreign",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.walletId],
+      foreignColumns: [wallets.id],
+      name: "transactions_wallet_id_foreign",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.categoryId],
+      foreignColumns: [categories.id],
+      name: "transactions_category_id_foreign",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.budgetId],
+      foreignColumns: [budgets.id],
+      name: "transactions_budget_id_foreign",
+    }).onDelete("set null"),
+  ],
 );
 
 export const walletTransfers = sqliteTable(
@@ -172,28 +164,26 @@ export const walletTransfers = sqliteTable(
     targetTransactionId: text("target_transaction_id").notNull(),
     feeTransactionId: text("fee_transaction_id"),
   },
-  (table) => {
-    return {
-      primaryKey: primaryKey({
-        columns: [table.sourceTransactionId, table.targetTransactionId],
-      }),
-      sourceTransactionReference: foreignKey({
-        columns: [table.sourceTransactionId],
-        foreignColumns: [transactions.id],
-        name: "wallet_transfers_source_transaction_id_foreign",
-      }).onDelete("cascade"),
-      targetTransactionReference: foreignKey({
-        columns: [table.targetTransactionId],
-        foreignColumns: [transactions.id],
-        name: "wallet_transfers_target_transaction_id_foreign",
-      }).onDelete("cascade"),
-      feeTransactionReference: foreignKey({
-        columns: [table.feeTransactionId],
-        foreignColumns: [transactions.id],
-        name: "wallet_transfers_fee_transaction_id_foreign",
-      }).onDelete("set null"),
-    };
-  },
+  (table) => [
+    primaryKey({
+      columns: [table.sourceTransactionId, table.targetTransactionId],
+    }),
+    foreignKey({
+      columns: [table.sourceTransactionId],
+      foreignColumns: [transactions.id],
+      name: "wallet_transfers_source_transaction_id_foreign",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.targetTransactionId],
+      foreignColumns: [transactions.id],
+      name: "wallet_transfers_target_transaction_id_foreign",
+    }).onDelete("cascade"),
+    foreignKey({
+      columns: [table.feeTransactionId],
+      foreignColumns: [transactions.id],
+      name: "wallet_transfers_fee_transaction_id_foreign",
+    }).onDelete("set null"),
+  ],
 );
 
 // TODO: table ledger
