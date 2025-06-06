@@ -43,9 +43,7 @@ export const wallets = sqliteTable(
     id: uuidAsId,
     userId: text("user_id").notNull(),
     name: text("name").notNull(),
-    balance: integer("balance").notNull().default(0),
     icon: text("icon"),
-    sortOrder: integer("sort_order").default(1),
     createdAt: createdAt,
     updatedAt: updatedAt,
     disabledAt: integer("disabled_at", { mode: "timestamp_ms" }),
@@ -68,6 +66,7 @@ export const budgets = sqliteTable(
     id: uuidAsId,
     userId: text("user_id").notNull(),
     amount: integer("amount").notNull().default(0),
+    type: text("type").notNull(), // recurring/one-time
     createdAt: createdAt,
     updatedAt: updatedAt,
   },
@@ -157,16 +156,29 @@ export const transactions = sqliteTable(
   ],
 );
 
+export const budgetTransactions = sqliteTable(
+  "budget_transactions",
+  {
+    transactionId: text("transaction_id").notNull(),
+    budgetId: text("budget_id").notNull(),
+  },
+  (table) => [
+    primaryKey({
+      columns: [table.transactionId, table.budgetId],
+    }),
+  ],
+);
+
 export const walletTransfers = sqliteTable(
   "wallet_transfers",
   {
     sourceTransactionId: text("source_transaction_id").notNull(),
-    targetTransactionId: text("target_transaction_id").notNull(),
+    destinationTransactionId: text("destination_transaction_id").notNull(),
     feeTransactionId: text("fee_transaction_id"),
   },
   (table) => [
     primaryKey({
-      columns: [table.sourceTransactionId, table.targetTransactionId],
+      columns: [table.sourceTransactionId, table.destinationTransactionId],
     }),
     foreignKey({
       columns: [table.sourceTransactionId],
@@ -174,9 +186,9 @@ export const walletTransfers = sqliteTable(
       name: "wallet_transfers_source_transaction_id_foreign",
     }).onDelete("cascade"),
     foreignKey({
-      columns: [table.targetTransactionId],
+      columns: [table.destinationTransactionId],
       foreignColumns: [transactions.id],
-      name: "wallet_transfers_target_transaction_id_foreign",
+      name: "wallet_transfers_destination_transaction_id_foreign",
     }).onDelete("cascade"),
     foreignKey({
       columns: [table.feeTransactionId],
@@ -185,5 +197,3 @@ export const walletTransfers = sqliteTable(
     }).onDelete("set null"),
   ],
 );
-
-// TODO: table ledger
