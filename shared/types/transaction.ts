@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 import type { WalletResponse } from "./wallet";
 import type { CategoryResponse } from "./category";
 import { isValid, parseISO } from "date-fns";

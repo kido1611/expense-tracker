@@ -1,4 +1,4 @@
-import { z } from "zod";
+import { z } from "zod/v4";
 
 export const PaginationSchema = z.object({
   page: z.coerce.number().gte(1).default(1),
