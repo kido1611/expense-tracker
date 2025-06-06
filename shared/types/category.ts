@@ -5,3 +5,8 @@ export type CategoryResponse = {
   is_expense: boolean;
   created_at: Date | string;
 };
+
+export type CategoryStatTransaction = Omit<CategoryResponse, "created_at"> & {
+  transactions_count: number;
+  transactions_sum_amount: number;
+};

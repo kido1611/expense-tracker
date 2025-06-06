@@ -10,6 +10,8 @@ export const DASHBOARD_TOTAL_EXPENSE_TILE_THIS_MONTH_CACHE_KEY_NAME =
   "dashboard_total_expense_tile_this_month_cache_key_name";
 export const DASHBOARD_TOTAL_BALANCE_TILE_CACHE_KEY_NAME =
   "dashboard_total_balance_tile_cache_key_name";
+export const DASHBOARD_CATEGORIES_PER_TRANSACTIONS_CACHE_KEY_NAME =
+  "dashboard_categories_per_transactions_cache_key_name";
 
 export const DASHBOARD_INDEX_CACHE_KEYS = [
   INDEX_WALLETS_CACHE_KEY_NAME,
@@ -17,6 +19,7 @@ export const DASHBOARD_INDEX_CACHE_KEYS = [
   DASHBOARD_TOTAL_INCOME_TILE_THIS_MONTH_CACHE_KEY_NAME,
   DASHBOARD_TOTAL_EXPENSE_TILE_THIS_MONTH_CACHE_KEY_NAME,
   DASHBOARD_TOTAL_BALANCE_TILE_CACHE_KEY_NAME,
+  DASHBOARD_CATEGORIES_PER_TRANSACTIONS_CACHE_KEY_NAME,
 ];
 
 export function getFetchCache<Type>(

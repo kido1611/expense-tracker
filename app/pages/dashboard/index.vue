@@ -21,12 +21,13 @@ useHead({
     </div>
 
     <div
-      class="mt-6 grid grid-cols-1 gap-6 *:h-[400px] *:rounded-md *:border *:border-red-400 *:p-4 xl:grid-cols-[1fr_350px]"
+      class="mt-6 grid grid-cols-1 gap-6 *:h-[400px] *:rounded-lg *:border *:border-neutral-700 *:p-5 xl:grid-cols-[1fr_350px]"
     >
       <div>Chart in latest year</div>
-      <div>
-        Expense per Cateogory in this month, show message when no expense
-      </div>
+      <LazyStatisticExpensePerTransaction hydrate-on-idle />
+      <!-- <div> -->
+      <!--   Expense per Cateogory in this month, show message when no expense -->
+      <!-- </div> -->
     </div>
     <div class="mt-6 grid grid-cols-[repeat(auto-fit,minmax(300px,1fr))] gap-6">
       <IndexWalletList />
