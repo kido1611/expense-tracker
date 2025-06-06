@@ -4,7 +4,6 @@ export default defineNuxtConfig({
   devtools: { enabled: true },
   modules: [
     "@nuxthub/core",
-    "@nuxt/eslint",
     "@nuxt/ui",
     "nuxt-auth-utils",
     "@nuxt/test-utils/module",
