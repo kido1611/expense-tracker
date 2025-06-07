@@ -55,3 +55,18 @@ export async function removeFeeWalletTransfer(
       ),
     );
 }
+
+export async function createWalletTransfer(
+  db: DrizzleDatabase,
+  data: {
+    sourceTransactionId: string;
+    destinationTransactionId: string;
+    feeTransactionId?: string | null;
+  },
+) {
+  await db.insert(tables.walletTransfers).values({
+    sourceTransactionId: data.sourceTransactionId,
+    destinationTransactionId: data.destinationTransactionId,
+    feeTransactionId: data.feeTransactionId,
+  });
+}

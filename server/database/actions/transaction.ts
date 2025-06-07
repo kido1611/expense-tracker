@@ -1,13 +1,19 @@
 import { desc, eq, aliasedTable, inArray } from "drizzle-orm";
 
-export async function createUserTransaction(data: TransactionInsert) {
-  const [transaction] = await createUserTransactions([data]);
+export async function createUserTransaction(
+  db: DrizzleDatabase,
+  data: TransactionInsert,
+) {
+  const [transaction] = await createUserTransactions(db, [data]);
 
   return transaction;
 }
 
-export async function createUserTransactions(data: TransactionInsert[]) {
-  const transactions = await useDrizzle()
+export async function createUserTransactions(
+  db: DrizzleDatabase,
+  data: TransactionInsert[],
+) {
+  const transactions = await db
     .insert(tables.transactions)
     .values(data)
     .returning();

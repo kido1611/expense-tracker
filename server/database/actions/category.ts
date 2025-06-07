@@ -1,10 +1,11 @@
 import { eq, and, desc, asc } from "drizzle-orm";
 
 export async function getUserCategoryByKey(
+  db: DrizzleDatabase,
   userId: string,
   categoryKey: string,
 ) {
-  const category = await useDrizzle().query.categories.findFirst({
+  const category = await db.query.categories.findFirst({
     where: and(
       eq(tables.categories.userId, userId),
       eq(tables.categories.key, categoryKey),

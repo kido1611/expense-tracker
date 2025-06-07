@@ -18,8 +18,8 @@ export async function getUserByEmail(email: string) {
   return user;
 }
 
-export async function getUserById(id: string) {
-  const user = await useDrizzle().query.users.findFirst({
+export async function getUserById(db: DrizzleDatabase, id: string) {
+  const user = await db.query.users.findFirst({
     where: and(eq(tables.users.id, id)),
   });
 

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
+import type { WalletIcons } from "~~/shared/types/wallet";
 
 const emit = defineEmits<{
   close: [];
@@ -8,7 +9,11 @@ const emit = defineEmits<{
 const toast = useToast();
 const { isLoading, setLoading } = useLoading();
 
-const state = reactive({
+const state = reactive<{
+  name: string;
+  balance: number;
+  icon: WalletIcons;
+}>({
   name: "",
   balance: 0,
   icon: "i-tabler-wallet",

@@ -1,34 +1,45 @@
 import type { H3Event } from "h3";
-
-import { createUserWallet } from "~~/server/database/actions/wallet";
-import { getUserCategoryByKey } from "~~/server/database/actions/category";
-import { createUserTransaction } from "~~/server/database/actions/transaction";
-import { Wallet, User } from "~~/server/utils/drizzle";
+import {
+  createUserTransaction,
+  getUserCategoryByKey,
+  getUserWalletById,
+  updateUserWalletById,
+} from "~~/server/database/actions";
 
 defineRouteMeta({
   openAPI: {
     tags: ["Wallets"],
-    description: "Create a new user wallet.",
+    description: "Update user wallet by id.",
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        description: "Wallet id",
+        schema: {
+          type: "string",
+        },
+        style: "simple",
+        required: true,
+      },
+    ],
     requestBody: {
-      description: "Create a new wallet.",
+      description: "Update user wallet.",
       content: {
         "application/json": {
           schema: {
             type: "object",
-            required: [name],
             properties: {
               name: {
                 type: "string",
+                nullable: true,
               },
               balance: {
                 type: "number",
-                default: 0,
                 nullable: true,
               },
               icon: {
                 type: "string",
                 nullable: true,
-                default: "i-tabler-wallet",
               },
             },
           },
@@ -41,20 +52,31 @@ defineRouteMeta({
                 icon: "i-tabler-wallet",
               },
             },
-            minimal: {
+            "minimal name": {
               description: "Example with minimal data",
               value: {
-                name: "wallet name",
+                name: "wallet new name",
+              },
+            },
+            "minimal balance": {
+              description: "Example with minimal data2 ",
+              value: {
+                balance: 2000000,
+              },
+            },
+            "minimal icon": {
+              description: "Example with minimal data 3",
+              value: {
+                icon: "i-tabler-hearth",
               },
             },
           },
         },
       },
-      required: true,
     },
     responses: {
-      "201": {
-        description: "Success create a wallet.",
+      "200": {
+        description: "Success update user wallet.",
         content: {
           "application/json": {
             schema: {
@@ -93,8 +115,8 @@ defineRouteMeta({
             },
             example: {
               error: false,
-              statusCode: 201,
-              statusMessage: "Created",
+              statusCode: 200,
+              statusMessage: "OK",
               data: {
                 id: "01974935-6b76-70a8-9ec4-ee9b0ce987e2",
                 name: "Wallet A",
@@ -136,35 +158,82 @@ defineRouteMeta({
           },
         },
       },
+      "404": {
+        description:
+          "Wallet not found. Can be missing or wallet is owned by another user.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 404,
+              statusMessage: "Not Found",
+              message: "Wallet not found",
+            },
+          },
+        },
+      },
     },
   },
 });
 export default defineEventHandler(
   async (event: H3Event): Promise<ApiResponse<WalletResponse>> => {
+    const validatedParams = await getValidatedRouterParams(
+      event,
+      WalletRouteParamSchema.parse,
+    );
+
     const validatedBody = await readValidatedBody(
       event,
-      WalletCreateSchema.parse,
+      WalletUpdateSchema.parse,
     );
 
     const db = useDrizzle();
-    const user: User = await ensureUserIsAvailable(event, db);
+    const user = await ensureUserIsAvailable(event, db);
 
-    const wallet: Wallet = await createUserWallet(db, user.id, validatedBody);
+    const wallet = await getUserWalletById(db, user.id, validatedParams.id);
 
-    // If balance != 0, add transaction
-    if (validatedBody.balance > 0) {
-      const category = await getUserCategoryByKey(
-        db,
-        user.id,
-        "income_balance",
-      );
+    if (!wallet) {
+      throw createError({
+        ...httpStatusMessage[404],
+        message: "Wallet not found",
+      });
+    }
 
+    if (validatedBody.name || validatedBody.icon) {
+      await updateUserWalletById(db, user.id, wallet.id, validatedBody);
+    }
+
+    if (validatedBody.balance && validatedBody.balance != wallet.balance) {
+      const diffBalance = validatedBody.balance - wallet.balance;
+      const categoryKey =
+        diffBalance < 0 ? "expense_balance" : "income_balance";
+
+      const category = await getUserCategoryByKey(db, user.id, categoryKey);
+
+      // Do nothing when category is missing
       if (category) {
         await createUserTransaction(db, {
           userId: user.id,
           walletId: wallet.id,
           categoryId: category.id,
-          amount: validatedBody.balance,
+          amount: diffBalance >= 0 ? diffBalance : diffBalance * -1,
           isVisibleInReport: true,
           transactionAt: new Date(),
           note: null,
@@ -172,16 +241,15 @@ export default defineEventHandler(
       }
     }
 
-    setResponseStatus(event, 201);
     return {
       error: false,
-      ...httpStatusMessage[201],
+      ...httpStatusMessage[200],
       data: {
         id: wallet.id,
-        name: wallet.name,
-        icon: wallet.icon,
-        balance: validatedBody.balance,
-        created_at: wallet.createdAt,
+        name: validatedBody.name ?? wallet.name,
+        icon: validatedBody.icon ?? wallet.icon,
+        balance: validatedBody.balance ?? wallet.balance,
+        created_at: wallet.created_at,
       },
     };
   },

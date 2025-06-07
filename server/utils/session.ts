@@ -5,9 +5,18 @@ import { getUserById } from "~~/server/database/actions";
 
 export async function ensureUserIsAvailable(
   event: H3Event,
-  userSession: UserSessionRequired,
+  db: DrizzleDatabase,
 ): Promise<User> {
-  const result = await getUserById(userSession.user.id);
+  const session = await getUserSession(event);
+
+  if (!session.user) {
+    throw createError({
+      statusCode: 401,
+      statusMessage: "Unauthorized",
+      message: "Unauthorized",
+    });
+  }
+  const result = await getUserById(db, session.user.id);
 
   if (!result) {
     await clearUserSession(event);

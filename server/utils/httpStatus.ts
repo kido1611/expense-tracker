@@ -23,6 +23,10 @@ export const httpStatusMessage = {
     statusCode: 409,
     statusMessage: "Conflict",
   },
+  422: {
+    statusCode: 422,
+    statusMessage: "Unprocessable Content",
+  },
   500: {
     statusCode: 500,
     statusMessage: "Internal Server Error",
