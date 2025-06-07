@@ -25,27 +25,24 @@ defineRouteMeta({
         "application/json": {
           schema: {
             type: "object",
-            required: [name],
+            required: [
+              "source_wallet_id",
+              "destination_wallet_id",
+              "amount",
+              "transfer_at",
+            ],
             properties: {
               source_wallet_id: {
                 type: "string",
-                // @ts-expect-error
-                required: true,
               },
               destination_wallet_id: {
                 type: "string",
-                // @ts-expect-error
-                required: true,
               },
               amount: {
                 type: "number",
-                // @ts-expect-error
-                required: true,
               },
               transfer_at: {
                 type: "string",
-                // @ts-expect-error
-                required: true,
               },
               note: {
                 type: "string",
