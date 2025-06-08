@@ -18,7 +18,12 @@ const WalletIconsSchema = z.literal([
 export type WalletIcons = z.output<typeof WalletIconsSchema>;
 
 export const WalletCreateSchema = z.object({
-  name: z.string().trim().min(2).max(100),
+  name: z
+    .string()
+    .trim()
+    .nonempty({ error: "Name is required" })
+    .min(2)
+    .max(100),
   balance: z.coerce.number().gte(0).default(0),
   icon: WalletIconsSchema,
 });

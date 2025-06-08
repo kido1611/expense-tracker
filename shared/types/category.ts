@@ -14,7 +14,7 @@ export type CategoryStatTransaction = Omit<CategoryResponse, "created_at"> & {
 };
 
 export const CategoryCreateSchema = z.object({
-  name: z.string().min(2).max(100),
+  name: z.string().nonempty({ error: "Name is required" }).min(2).max(100),
   // TODO: use literal
   icon: z.string(),
   isExpense: z.boolean(),
