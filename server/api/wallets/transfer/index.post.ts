@@ -7,7 +7,7 @@ import {
   createUserTransactions,
   createWalletTransfer,
 } from "~~/server/database/actions";
-import { parseStringDateToDate } from "~~/server/utils/date";
+import { parseStringDateToDate } from "~~/shared/utils/date";
 
 type Response = {
   source_transaction: Omit<TransactionResponse, "wallet" | "category">;

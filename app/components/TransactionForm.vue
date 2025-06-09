@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
 
-import { format } from "date-fns";
+import { format, formatISO } from "date-fns";
 
 const emit = defineEmits<{
   close: [];
@@ -31,19 +31,23 @@ const state = reactive({
   walletId: "",
   categoryId: "",
   amount: 0,
-  transactionAt: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
+  transactionAt: format(new Date(), "yyyy-MM-dd"),
   note: "",
   isVisibleInReport: true,
 });
 const statePhoto = ref<File | null | undefined>(null);
 
 async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
+  const data = {
+    ...event.data,
+    transactionAt: formatISO(syncDateToDateTime(event.data.transactionAt)),
+  };
   try {
     setLoading(true);
 
     const transaction = await $fetch("/api/transactions", {
       method: "POST",
-      body: event.data,
+      body: data,
     });
 
     await uploadImage(transaction.data?.id);
@@ -51,7 +55,7 @@ async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
     state.walletId = "";
     state.categoryId = "";
     state.amount = 0;
-    state.transactionAt = format(new Date(), "yyyy-MM-dd'T'HH:mm");
+    state.transactionAt = format(new Date(), "yyyy-MM-dd");
     state.note = "";
     state.isVisibleInReport = true;
     statePhoto.value = null;
@@ -154,7 +158,7 @@ async function onFileSelect(event: Event) {
         placeholder="Find wallet..."
       >
         <template v-if="selectedWallet">
-          <div class="flex flex-col space-y-0.5 px-1 text-start">
+          <div class="ml-0 flex flex-col space-y-0.5 px-1 text-start">
             <p class="font-medium">{{ selectedWallet.name }}</p>
             <p
               :class="{
@@ -169,7 +173,7 @@ async function onFileSelect(event: Event) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="text-primary size-5 flex-none"
+            class="size-5 flex-none text-primary"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
@@ -218,7 +222,7 @@ async function onFileSelect(event: Event) {
         </template>
 
         <template v-if="selectedCategory">
-          <div class="flex flex-col space-y-0.5 px-1 text-start">
+          <div class="ml-0 flex flex-col space-y-0.5 px-1 text-start">
             <p class="font-medium">{{ selectedCategory.name }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
               {{ selectedCategory.is_expense ? "Expense" : "Income" }}
@@ -272,7 +276,7 @@ async function onFileSelect(event: Event) {
     >
       <UInput
         v-model="state.transactionAt"
-        type="datetime-local"
+        type="date"
         required
         :disabled="isLoading"
       />

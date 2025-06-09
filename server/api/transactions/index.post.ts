@@ -7,7 +7,7 @@ import {
   getUserCategoryById,
 } from "~~/server/database/actions";
 import { httpStatusMessage } from "~~/server/utils/httpStatus";
-import { parseStringDateToDate } from "~~/server/utils/date";
+import { parseStringDateToDate } from "~~/shared/utils/date";
 
 defineRouteMeta({
   openAPI: {
