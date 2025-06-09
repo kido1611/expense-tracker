@@ -3,8 +3,18 @@ import type { WalletResponse } from "./wallet";
 import type { CategoryResponse } from "./category";
 
 export const TransactionCreateSchema = z.object({
-  walletId: z.uuid(),
-  categoryId: z.uuid(),
+  walletId: z
+    .uuid({
+      error: "Invalid format",
+    })
+    .nonempty({ error: "Wallet is required" }),
+  categoryId: z
+    .uuid({
+      error: "Invalid format",
+    })
+    .nonempty({
+      error: "Category is required",
+    }),
   amount: z.coerce.number(),
   note: z.string().max(200).nullish(),
   transactionAt: z.union([z.date(), z.iso.date(), z.iso.datetime()]),
@@ -13,8 +23,19 @@ export const TransactionCreateSchema = z.object({
 
 export type TransactionCreate = z.output<typeof TransactionCreateSchema>;
 
-export type TransactionInsert = TransactionCreate & {
+export const TransactionUpdateSchema = TransactionCreateSchema.partial();
+
+export type TransactionUpdateType = Omit<
+  z.output<typeof TransactionUpdateSchema>,
+  "transactionAt"
+> & {
+  transactionAt?: Date | undefined;
+  imagePath?: string | null;
+};
+
+export type TransactionInsert = Omit<TransactionCreate, "transactionAt"> & {
   userId: string;
+  transactionAt: Date;
 };
 
 export type TransactionResponse = {
@@ -26,7 +47,7 @@ export type TransactionResponse = {
   is_visible_in_report: boolean;
   is_wallet_transfer?: boolean | null;
   created_at: Date | string;
-  wallet: WalletResponse;
+  wallet: Omit<WalletResponse, "balance">;
   category: CategoryResponse;
 };
 

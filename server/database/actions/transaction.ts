@@ -1,4 +1,6 @@
 import { desc, eq, aliasedTable, inArray } from "drizzle-orm";
+import { DrizzleDatabase } from "~~/server/utils/drizzle";
+import { TransactionUpdateType } from "~~/shared/types/transaction";
 
 export async function createUserTransaction(
   db: DrizzleDatabase,
@@ -22,10 +24,11 @@ export async function createUserTransactions(
 }
 
 export async function getUserTransactionById(
+  db: DrizzleDatabase,
   userId: string,
   transactionId: string,
 ) {
-  const transaction = await useDrizzle().query.transactions.findFirst({
+  const transaction = await db.query.transactions.findFirst({
     where: and(
       eq(tables.transactions.userId, userId),
       eq(tables.transactions.id, transactionId),
@@ -50,28 +53,8 @@ export async function getUserTransactionByIds(
   return transactions;
 }
 
-export async function removeTransactionImageById(transactionId: string) {
-  await useDrizzle()
-    .update(tables.transactions)
-    .set({
-      imagePath: null,
-    })
-    .where(eq(tables.transactions.id, transactionId));
-}
-
-export async function updateTransactionImageById(
-  transactionId: string,
-  imagePath: string,
-) {
-  await useDrizzle()
-    .update(tables.transactions)
-    .set({
-      imagePath: imagePath,
-    })
-    .where(eq(tables.transactions.id, transactionId));
-}
-
 export async function getUserTransactions(
+  db: DrizzleDatabase,
   userId: string,
   pagination: Pagination,
 ) {
@@ -79,7 +62,7 @@ export async function getUserTransactions(
     tables.walletTransfers,
     "source_wallet_transfer",
   );
-  const targetWalletTransfer = aliasedTable(
+  const destinationWalletTransfer = aliasedTable(
     tables.walletTransfers,
     "target_wallet_transfer",
   );
@@ -87,7 +70,7 @@ export async function getUserTransactions(
     tables.walletTransfers,
     "fee_wallet_transfer",
   );
-  const transactions = await useDrizzle()
+  const transactions = await db
     .select({
       id: tables.transactions.id,
       amount: tables.transactions.amount,
@@ -96,17 +79,17 @@ export async function getUserTransactions(
       transaction_at: tables.transactions.transactionAt,
       is_visible_in_report: tables.transactions.isVisibleInReport,
       created_at: tables.transactions.createdAt,
-      is_wallet_transfer: sql<boolean>`${sourceWalletTransfer.sourceTransactionId} is not null or ${targetWalletTransfer.targetTransactionId} is not null or ${feeWalletTransfer.feeTransactionId} is not null`,
+      is_wallet_transfer: sql<boolean>`${sourceWalletTransfer.sourceTransactionId} is not null or ${destinationWalletTransfer.destinationTransactionId} is not null or ${feeWalletTransfer.feeTransactionId} is not null`,
       wallet: {
         id: tables.wallets.id,
         name: tables.wallets.name,
-        balance: tables.wallets.balance,
         icon: tables.wallets.icon,
         created_at: tables.wallets.createdAt,
       },
       category: {
         id: tables.categories.id,
         name: tables.categories.name,
+        icon: tables.categories.icon,
         is_expense: tables.categories.isExpense,
         created_at: tables.categories.createdAt,
       },
@@ -125,8 +108,11 @@ export async function getUserTransactions(
       eq(tables.transactions.id, sourceWalletTransfer.sourceTransactionId),
     )
     .leftJoin(
-      targetWalletTransfer,
-      eq(tables.transactions.id, targetWalletTransfer.targetTransactionId),
+      destinationWalletTransfer,
+      eq(
+        tables.transactions.id,
+        destinationWalletTransfer.destinationTransactionId,
+      ),
     )
     .leftJoin(
       feeWalletTransfer,
@@ -157,4 +143,24 @@ export async function deleteUserTransactionsByIds(
         inArray(tables.transactions.id, transactionIds),
       ),
     );
+}
+
+export async function updateUserTransactionById(
+  db: DrizzleDatabase,
+  userId: string,
+  transactionId: string,
+  data: TransactionUpdateType,
+) {
+  const [transaction] = await db
+    .update(tables.transactions)
+    .set(data)
+    .where(
+      and(
+        eq(tables.transactions.userId, userId),
+        eq(tables.transactions.id, transactionId),
+      ),
+    )
+    .returning();
+
+  return transaction;
 }

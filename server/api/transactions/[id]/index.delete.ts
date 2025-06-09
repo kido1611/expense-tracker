@@ -4,34 +4,87 @@ import {
   getWalletTransferByTransactionId,
   getUserTransactionByIds,
   deleteUserTransactionsByIds,
-  updateWalletRelativeBalance,
   deleteWalletTransfer,
   removeFeeWalletTransfer,
 } from "~~/server/database/actions";
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Transactions"],
+    description:
+      "Delete user transaction(s). Also delete linked transaction (wallet transfer) if exists.",
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        description: "Transaction id",
+        schema: {
+          type: "string",
+        },
+        style: "simple",
+        required: true,
+      },
+    ],
+    responses: {
+      "204": {
+        description:
+          "Success delete user transaction(s). Result always success even error because transaction is missing or owned by another user.",
+      },
+      "401": {
+        description: "Unauthorized.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 401,
+              statusMessage: "Unauthorized",
+              message: "Unauthorized",
+            },
+          },
+        },
+      },
+    },
+  },
+});
 export default defineEventHandler(async (event: H3Event) => {
   const validatedParams = await getValidatedRouterParams(
     event,
     TransactionRouteParamSchema.parse,
   );
 
-  const session = await requireUserSession(event);
-  const user = await ensureUserIsAvailable(event, session);
+  const db = useDrizzle();
+  const user = await ensureUserIsAvailable(event, db);
 
   // get transaction
-  const transaction = await getUserTransactionById(user.id, validatedParams.id);
+  const transaction = await getUserTransactionById(
+    db,
+    user.id,
+    validatedParams.id,
+  );
 
   if (!transaction) {
-    throw createError({
-      ...httpStatusMessage[404],
-      message: "transaction not found",
-    });
+    setResponseStatus(event, 204);
+    return null;
   }
 
-  const db = useDrizzle();
-
   const deletedTransactionsIds: string[] = [];
-  const updateWallets = new Map<string, number>();
   const imagePaths = new Set<string>();
 
   // -------------------------------------------------- Gathering data
@@ -44,7 +97,7 @@ export default defineEventHandler(async (event: H3Event) => {
 
   if (walletTransfer && !isFeeWalletTransfer) {
     deletedTransactionsIds.push(walletTransfer.sourceTransactionId);
-    deletedTransactionsIds.push(walletTransfer.targetTransactionId);
+    deletedTransactionsIds.push(walletTransfer.destinationTransactionId);
     if (walletTransfer.feeTransactionId) {
       deletedTransactionsIds.push(walletTransfer.feeTransactionId);
     }
@@ -55,22 +108,12 @@ export default defineEventHandler(async (event: H3Event) => {
       deletedTransactionsIds,
     );
     for (const transaction of transactions) {
-      updateWallets.set(
-        transaction.walletId,
-        (updateWallets.get(transaction.walletId) ?? 0) - transaction.amount,
-      );
-
       if (transaction.imagePath) {
         imagePaths.add(transaction.imagePath);
       }
     }
   } else {
     deletedTransactionsIds.push(transaction.id);
-
-    updateWallets.set(
-      transaction.walletId,
-      (updateWallets.get(transaction.walletId) ?? 0) - transaction.amount,
-    );
 
     if (transaction.imagePath) {
       imagePaths.add(transaction.imagePath);
@@ -86,15 +129,11 @@ export default defineEventHandler(async (event: H3Event) => {
     }
   }
 
-  await deleteUserTransactionsByIds(db, user.id, deletedTransactionsIds);
-
-  for (const [key, value] of updateWallets) {
-    await updateWalletRelativeBalance(db, key, value);
-  }
-
-  for (const path of imagePaths) {
-    await deleteImage(path);
-  }
+  await Promise.all([
+    deleteUserTransactionsByIds(db, user.id, deletedTransactionsIds),
+    ...[...imagePaths].map((path) => deleteImage(path)),
+  ]);
 
   setResponseStatus(event, 204);
+  return null;
 });

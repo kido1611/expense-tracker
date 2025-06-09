@@ -21,7 +21,7 @@ defineRouteMeta({
     responses: {
       "204": {
         description:
-          "Success delete user category. Result still success even error because category is missing or owned by another user.",
+          "Success delete user category. Result always success even error because category is missing or owned by another user.",
       },
       "401": {
         description: "Unauthorized.",

@@ -2,9 +2,123 @@ import type { H3Event } from "h3";
 import { v4 as uuidv4 } from "uuid";
 import {
   getUserTransactionById,
-  updateTransactionImageById,
+  updateUserTransactionById,
 } from "~~/server/database/actions";
 
+defineRouteMeta({
+  openAPI: {
+    tags: ["Transactions"],
+    description: "Upload image to transaction.",
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        description: "Transaction id",
+        schema: {
+          type: "string",
+        },
+        style: "simple",
+        required: true,
+      },
+    ],
+    responses: {
+      "204": {
+        description: "Success upload image to transaction.",
+      },
+      "400": {
+        description: "Bad Request. Failed validate image",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 400,
+              statusMessage: "Bad Request",
+              message: "No image provided",
+            },
+          },
+        },
+      },
+      "401": {
+        description: "Unauthorized.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 401,
+              statusMessage: "Unauthorized",
+              message: "Unauthorized",
+            },
+          },
+        },
+      },
+      "404": {
+        description:
+          "Transaction not found. Can be missing or tranasction is owned by another user.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 404,
+              statusMessage: "Not Found",
+              message: "Transaction not found",
+            },
+          },
+        },
+      },
+    },
+  },
+});
 export default defineEventHandler(async (event: H3Event) => {
   const validatedParams = await getValidatedRouterParams(
     event,
@@ -18,31 +132,33 @@ export default defineEventHandler(async (event: H3Event) => {
   const file = form.get("image") as File;
 
   if (!file || file.size === 0) {
-    setResponseStatus(event, 400);
-    return {
-      status: "error",
+    throw createError({
+      ...httpStatusMessage[400],
       message: "No image provided",
-    };
+    });
   }
 
   ensureBlob(file, {
-    maxSize: "1MB",
+    maxSize: "2MB",
     types: ["image"],
   });
 
-  const session = await requireUserSession(event);
-  const user = await ensureUserIsAvailable(event, session);
+  const db = useDrizzle();
+  const user = await ensureUserIsAvailable(event, db);
 
   /**
    * Get transaction
    */
-  const transaction = await getUserTransactionById(user.id, validatedParams.id);
+  const transaction = await getUserTransactionById(
+    db,
+    user.id,
+    validatedParams.id,
+  );
   if (!transaction) {
-    setResponseStatus(event, 404);
-    return {
-      status: "error",
-      message: "Transaction is missing",
-    };
+    throw createError({
+      ...httpStatusMessage[404],
+      message: "Transaction not found",
+    });
   }
 
   /**
@@ -57,15 +173,12 @@ export default defineEventHandler(async (event: H3Event) => {
     prefix: `transactions/${transaction.id}/`,
   });
 
-  /**
-   * Delete old transaction image if exist
-   */
-  await deleteImage(transaction?.imagePath);
-
-  /**
-   * Update image_path in transaction
-   */
-  await updateTransactionImageById(transaction.id, path.pathname);
+  await Promise.all([
+    deleteImage(transaction?.imagePath),
+    updateUserTransactionById(db, user.id, transaction.id, {
+      imagePath: path.pathname,
+    }),
+  ]);
 
   setResponseStatus(event, 204);
 });

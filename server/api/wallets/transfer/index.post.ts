@@ -7,6 +7,7 @@ import {
   createUserTransactions,
   createWalletTransfer,
 } from "~~/server/database/actions";
+import { parseStringDateToDate } from "~~/server/utils/date";
 
 type Response = {
   source_transaction: Omit<TransactionResponse, "wallet" | "category">;
@@ -378,9 +379,7 @@ export default defineEventHandler(
       });
     }
 
-    const transferAt = isDate(validatedBody.transfer_at)
-      ? validatedBody.transfer_at
-      : parseISO(validatedBody.transfer_at);
+    const transferAt = parseStringDateToDate(validatedBody.transfer_at);
 
     const transactions = [
       {

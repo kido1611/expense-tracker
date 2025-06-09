@@ -21,7 +21,7 @@ defineRouteMeta({
     responses: {
       "204": {
         description:
-          "Success delete user wallet. Result still success even error because wallet is missing or owned by another user.",
+          "Success delete user wallet. Result always success even error because wallet is missing or owned by another user.",
       },
       "401": {
         description: "Unauthorized.",

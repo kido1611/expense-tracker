@@ -76,36 +76,6 @@ export async function updateUserWalletById(
   return wallet;
 }
 
-// TODO: delete?
-export async function updateUserWalletBalance(
-  userId: string,
-  walletId: string,
-  balance: number,
-) {
-  await useDrizzle()
-    .update(tables.wallets)
-    .set({
-      balance: balance,
-    })
-    .where(
-      and(eq(tables.wallets.id, walletId), eq(tables.wallets.userId, userId)),
-    );
-}
-
-// TODO: delete?
-export async function updateWalletRelativeBalance(
-  db: DrizzleDatabase,
-  walletId: string,
-  balance: number,
-) {
-  await db
-    .update(tables.wallets)
-    .set({
-      balance: sql`${tables.wallets.balance} + ${balance}`,
-    })
-    .where(eq(tables.wallets.id, walletId));
-}
-
 export async function deleteUserWalletById(
   db: DrizzleDatabase,
   userId: string,

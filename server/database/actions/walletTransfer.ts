@@ -7,7 +7,7 @@ export async function getWalletTransferByTransactionId(
   return await db.query.walletTransfers.findFirst({
     where: or(
       eq(tables.walletTransfers.sourceTransactionId, transactionId),
-      eq(tables.walletTransfers.targetTransactionId, transactionId),
+      eq(tables.walletTransfers.destinationTransactionId, transactionId),
       eq(tables.walletTransfers.feeTransactionId, transactionId),
     ),
   });
@@ -26,8 +26,8 @@ export async function deleteWalletTransfer(
           walletTransfer.sourceTransactionId,
         ),
         eq(
-          tables.walletTransfers.targetTransactionId,
-          walletTransfer.targetTransactionId,
+          tables.walletTransfers.destinationTransactionId,
+          walletTransfer.destinationTransactionId,
         ),
       ),
     );
@@ -49,8 +49,8 @@ export async function removeFeeWalletTransfer(
           walletTransfer.sourceTransactionId,
         ),
         eq(
-          tables.walletTransfers.targetTransactionId,
-          walletTransfer.targetTransactionId,
+          tables.walletTransfers.destinationTransactionId,
+          walletTransfer.destinationTransactionId,
         ),
       ),
     );

@@ -1,75 +1,32 @@
 import type { H3Event } from "h3";
-import { ensureUserIsAvailable } from "~~/server/utils/session";
-
 import {
-  getUserWalletById,
-  createUserTransaction,
   getUserCategoryById,
+  getUserTransactionById,
+  getUserWalletById,
+  getWalletTransferByTransactionId,
 } from "~~/server/database/actions";
-import { httpStatusMessage } from "~~/server/utils/httpStatus";
-import { parseStringDateToDate } from "~~/server/utils/date";
+import { TransactionResponse } from "~~/shared/types/transaction";
+import { ApiResponse } from "~~/shared/types/wrapper";
 
 defineRouteMeta({
   openAPI: {
     tags: ["Transactions"],
-    description: "Create a new user transaction.",
-    requestBody: {
-      description: "Create new transaction",
-      required: true,
-      content: {
-        "application/json": {
-          schema: {
-            type: "object",
-            required: ["walletId", "categoryId", "amount", "transactionAt"],
-            properties: {
-              walletId: {
-                type: "string",
-              },
-              categoryId: {
-                type: "string",
-              },
-              amount: {
-                type: "number",
-              },
-              note: {
-                type: ["null", "string"],
-              },
-              transactionAt: {
-                type: "string",
-              },
-              isVisibleInReport: {
-                type: "boolean",
-              },
-            },
-          },
-          examples: {
-            full: {
-              description: "Example with full data",
-              value: {
-                walletId: "01974a61-73ee-724f-a5af-a00ac422c5e0",
-                categoryId: "01974745-6fe7-7208-876c-049191477f0a",
-                amount: 1000000,
-                note: null,
-                transactionAt: "2025-06-08",
-                isVisibleInReport: true,
-              },
-            },
-            minimal: {
-              description: "Example with minimal data",
-              value: {
-                walletId: "01974a61-73ee-724f-a5af-a00ac422c5e0",
-                categoryId: "01974745-6fe7-7208-876c-049191477f0a",
-                amount: 500000,
-                transactionAt: "2025-06-08",
-              },
-            },
-          },
+    description: "Get user transaction.",
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        description: "Transaction id",
+        schema: {
+          type: "string",
         },
+        style: "simple",
+        required: true,
       },
-    },
+    ],
     responses: {
       "200": {
-        description: "Success get user transactions.",
+        description: "Success get user transaction.",
         content: {
           "application/json": {
             schema: {
@@ -207,62 +164,100 @@ defineRouteMeta({
           },
         },
       },
+      "404": {
+        description:
+          "Transaction not found. Can be missing or tranasction is owned by another user.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 404,
+              statusMessage: "Not Found",
+              message: "Transaction not found",
+            },
+          },
+        },
+      },
     },
   },
 });
 
 export default defineEventHandler(
   async (event: H3Event): Promise<ApiResponse<TransactionResponse>> => {
-    const validatedBody = await readValidatedBody(
+    const validatedParams = await getValidatedRouterParams(
       event,
-      TransactionCreateSchema.parse,
+      TransactionRouteParamSchema.parse,
     );
 
     const db = useDrizzle();
     const user = await ensureUserIsAvailable(event, db);
 
-    const wallet = await getUserWalletById(db, user.id, validatedBody.walletId);
+    const transaction = await getUserTransactionById(
+      db,
+      user.id,
+      validatedParams.id,
+    );
+    if (!transaction) {
+      throw createError({
+        ...httpStatusMessage[404],
+        message: "Transaction not found",
+      });
+    }
 
+    const wallet = await getUserWalletById(db, user.id, transaction.walletId);
     if (!wallet) {
       throw createError({
-        ...httpStatusMessage[422],
-        message: "Wallet not found",
+        ...httpStatusMessage[404],
+        message: "Wallet Transaction not found",
       });
     }
 
     const category = await getUserCategoryById(
       db,
       user.id,
-      validatedBody.categoryId,
+      transaction.categoryId,
     );
-
     if (!category) {
       throw createError({
-        ...httpStatusMessage[422],
-        message: "Category not found",
+        ...httpStatusMessage[404],
+        message: "Category Transaction not found",
       });
     }
 
-    const transactionDate = parseStringDateToDate(validatedBody.transactionAt);
-    const result = await createUserTransaction(db, {
-      ...validatedBody,
-      transactionAt: transactionDate,
-      userId: user.id,
-    });
+    const walletTransfer = await getWalletTransferByTransactionId(
+      db,
+      transaction.id,
+    );
 
-    setResponseStatus(event, 201);
     return {
       error: false,
-      ...httpStatusMessage[201],
+      ...httpStatusMessage[200],
       data: {
-        id: result.id,
-        amount: result.amount,
-        note: result.note,
-        image_path: result.imagePath,
-        transaction_at: result.transactionAt,
-        is_visible_in_report: result.isVisibleInReport,
-        is_wallet_transfer: false,
-        created_at: result.createdAt,
+        id: transaction.id,
+        amount: transaction.amount,
+        transaction_at: transaction.transactionAt,
+        is_visible_in_report: transaction.isVisibleInReport,
+        is_wallet_transfer: !!walletTransfer,
+        created_at: transaction.createdAt,
+        note: transaction.note,
+        image_path: transaction.imagePath,
         wallet: {
           id: wallet.id,
           name: wallet.name,

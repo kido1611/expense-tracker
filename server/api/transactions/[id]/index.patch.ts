@@ -1,26 +1,41 @@
+import consola from "consola";
 import type { H3Event } from "h3";
-import { ensureUserIsAvailable } from "~~/server/utils/session";
-
 import {
-  getUserWalletById,
-  createUserTransaction,
   getUserCategoryById,
+  getUserTransactionById,
+  getUserWalletById,
+  getWalletTransferByTransactionId,
+  updateUserTransactionById,
 } from "~~/server/database/actions";
-import { httpStatusMessage } from "~~/server/utils/httpStatus";
-import { parseStringDateToDate } from "~~/server/utils/date";
+import {
+  TransactionResponse,
+  TransactionUpdateSchema,
+} from "~~/shared/types/transaction";
+import { ApiResponse } from "~~/shared/types/wrapper";
 
 defineRouteMeta({
   openAPI: {
     tags: ["Transactions"],
-    description: "Create a new user transaction.",
+    description:
+      "Update user transaction. Also update linked transaction (wallet transfer) if exists.",
+    parameters: [
+      {
+        name: "id",
+        in: "path",
+        description: "Transaction id",
+        schema: {
+          type: "string",
+        },
+        style: "simple",
+        required: true,
+      },
+    ],
     requestBody: {
-      description: "Create new transaction",
-      required: true,
+      description: "Update transaction",
       content: {
         "application/json": {
           schema: {
             type: "object",
-            required: ["walletId", "categoryId", "amount", "transactionAt"],
             properties: {
               walletId: {
                 type: "string",
@@ -69,7 +84,7 @@ defineRouteMeta({
     },
     responses: {
       "200": {
-        description: "Success get user transactions.",
+        description: "Success update user transaction.",
         content: {
           "application/json": {
             schema: {
@@ -105,43 +120,6 @@ defineRouteMeta({
                     is_wallet_transfer: {
                       type: "boolean",
                     },
-                    wallet: {
-                      type: "object",
-                      properties: {
-                        id: {
-                          type: "string",
-                        },
-                        name: {
-                          type: "string",
-                        },
-                        icon: {
-                          type: "string",
-                        },
-                        created_at: {
-                          type: "string",
-                        },
-                      },
-                    },
-                    category: {
-                      type: "object",
-                      properties: {
-                        id: {
-                          type: "string",
-                        },
-                        name: {
-                          type: "string",
-                        },
-                        icon: {
-                          type: "string",
-                        },
-                        is_expense: {
-                          type: "boolean",
-                        },
-                        created_at: {
-                          type: "string",
-                        },
-                      },
-                    },
                   },
                 },
               },
@@ -159,19 +137,6 @@ defineRouteMeta({
                 is_visible_in_report: true,
                 created_at: "2025-06-07T12:33:23.334Z",
                 is_wallet_transfer: 0,
-                wallet: {
-                  id: "01974a61-a740-77dc-b289-be60463f41a5",
-                  name: "Wallet A",
-                  icon: "i-tabler-wallet",
-                  created_at: "2025-06-07T12:33:23.264Z",
-                },
-                category: {
-                  id: "01974745-6fe7-7208-876c-12f180cadf00",
-                  name: "Adjust Balance",
-                  icon: "i-hugeicons-money-receive-02",
-                  is_expense: false,
-                  created_at: "2025-06-06T22:03:42.439Z",
-                },
               },
             },
           },
@@ -207,75 +172,159 @@ defineRouteMeta({
           },
         },
       },
+      "404": {
+        description:
+          "Transaction not found. Can be missing or tranasction is owned by another user.",
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                error: {
+                  type: "boolean",
+                },
+                statusCode: {
+                  type: "number",
+                },
+                statusMessage: {
+                  type: "string",
+                },
+                message: {
+                  type: "string",
+                },
+              },
+            },
+            example: {
+              error: true,
+              statusCode: 404,
+              statusMessage: "Not Found",
+              message: "Transaction not found",
+            },
+          },
+        },
+      },
     },
   },
 });
-
 export default defineEventHandler(
-  async (event: H3Event): Promise<ApiResponse<TransactionResponse>> => {
+  async (
+    event: H3Event,
+  ): Promise<ApiResponse<Omit<TransactionResponse, "wallet" | "category">>> => {
+    const validatedParams = await getValidatedRouterParams(
+      event,
+      WalletRouteParamSchema.parse,
+    );
+
     const validatedBody = await readValidatedBody(
       event,
-      TransactionCreateSchema.parse,
+      TransactionUpdateSchema.parse,
     );
 
     const db = useDrizzle();
     const user = await ensureUserIsAvailable(event, db);
 
-    const wallet = await getUserWalletById(db, user.id, validatedBody.walletId);
-
-    if (!wallet) {
-      throw createError({
-        ...httpStatusMessage[422],
-        message: "Wallet not found",
-      });
-    }
-
-    const category = await getUserCategoryById(
+    const transaction = await getUserTransactionById(
       db,
       user.id,
-      validatedBody.categoryId,
+      validatedParams.id,
     );
 
-    if (!category) {
+    if (!transaction) {
       throw createError({
-        ...httpStatusMessage[422],
-        message: "Category not found",
+        ...httpStatusMessage[404],
+        message: "Transaction not found",
       });
     }
 
-    const transactionDate = parseStringDateToDate(validatedBody.transactionAt);
-    const result = await createUserTransaction(db, {
-      ...validatedBody,
-      transactionAt: transactionDate,
-      userId: user.id,
-    });
+    const data: Record<string, any> = {};
+    if (validatedBody.walletId) {
+      const wallet = await getUserWalletById(
+        db,
+        user.id,
+        validatedBody.walletId,
+      );
 
-    setResponseStatus(event, 201);
+      if (!wallet) {
+        throw createError({
+          ...httpStatusMessage[422],
+          message: "Wallet transaction not found",
+        });
+      }
+
+      data["walletId"] = wallet.id;
+    }
+
+    if (validatedBody.categoryId) {
+      const category = await getUserCategoryById(
+        db,
+        user.id,
+        validatedBody.categoryId,
+      );
+
+      if (!category) {
+        throw createError({
+          ...httpStatusMessage[422],
+          message: "Category transaction not found",
+        });
+      }
+
+      data["categoryId"] = category.id;
+    }
+
+    if (validatedBody.amount !== undefined) {
+      data["amount"] = validatedBody.amount;
+    }
+    if (validatedBody.transactionAt !== undefined) {
+      data["transactionAt"] = parseStringDateToDate(
+        validatedBody.transactionAt,
+      );
+    }
+    if (validatedBody.note !== undefined) {
+      data["note"] = validatedBody.note;
+    }
+    if (validatedBody.isVisibleInReport !== undefined) {
+      data["isVisibleInReport"] = validatedBody.isVisibleInReport;
+    }
+
+    consola.info(data);
+
+    const newTransaction = await updateUserTransactionById(
+      db,
+      user.id,
+      transaction.id,
+      data,
+    );
+
+    if (data.amount || data.transactionAt) {
+      const walletTransfer = await getWalletTransferByTransactionId(
+        db,
+        transaction.id,
+      );
+      if (walletTransfer) {
+        const linkedId =
+          walletTransfer.sourceTransactionId === transaction.id
+            ? walletTransfer.destinationTransactionId
+            : walletTransfer.sourceTransactionId;
+        await updateUserTransactionById(db, user.id, linkedId, {
+          amount: newTransaction.amount,
+          transactionAt: newTransaction.transactionAt,
+          note: newTransaction.note,
+        });
+      }
+    }
+
     return {
       error: false,
-      ...httpStatusMessage[201],
+      ...httpStatusMessage[200],
       data: {
-        id: result.id,
-        amount: result.amount,
-        note: result.note,
-        image_path: result.imagePath,
-        transaction_at: result.transactionAt,
-        is_visible_in_report: result.isVisibleInReport,
+        id: newTransaction.id,
+        amount: newTransaction.amount,
+        note: newTransaction.note,
+        image_path: newTransaction.imagePath,
+        transaction_at: newTransaction.transactionAt,
+        is_visible_in_report: newTransaction.isVisibleInReport,
         is_wallet_transfer: false,
-        created_at: result.createdAt,
-        wallet: {
-          id: wallet.id,
-          name: wallet.name,
-          icon: wallet.icon,
-          created_at: wallet.created_at,
-        },
-        category: {
-          id: category.id,
-          name: category.name,
-          icon: category.icon,
-          is_expense: category.isExpense,
-          created_at: category.createdAt,
-        },
+        created_at: newTransaction.createdAt,
       },
     };
   },

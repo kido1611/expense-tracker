@@ -1,4 +1,3 @@
-import type { UserSessionRequired } from "#auth-utils";
 import type { H3Event } from "h3";
 import type { User } from "./drizzle";
 import { getUserById } from "~~/server/database/actions";
