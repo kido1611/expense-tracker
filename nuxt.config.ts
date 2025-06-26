@@ -33,6 +33,9 @@ export default defineNuxtConfig({
     preference: "dark",
   },
   routeRules: {
+    "/": {
+      redirect: "/dashboard",
+    },
     "/dashboard/**": {
       ssr: false,
     },
