@@ -1,9 +1,10 @@
 import type { H3Event } from "h3";
 
 import { getUserByEmail } from "~~/server/database/actions/user";
+import { UserResponse } from "~~/shared/types/user";
 
 export default defineEventHandler(
-  async (event: H3Event): Promise<ApiResponse<undefined>> => {
+  async (event: H3Event): Promise<ApiResponse<UserResponse>> => {
     const validatedBody = await readValidatedBody(event, UserLoginSchema.parse);
 
     const user = await getUserByEmail(validatedBody.email);
@@ -33,6 +34,12 @@ export default defineEventHandler(
     return {
       error: false,
       ...httpStatusMessage[200],
+      data: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        created_at: user.createdAt,
+      },
     };
   },
 );

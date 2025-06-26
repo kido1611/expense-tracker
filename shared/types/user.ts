@@ -20,3 +20,10 @@ export const UserLoginSchema = z.object({
 });
 
 export type UserLogin = z.output<typeof UserLoginSchema>;
+
+export type UserResponse = {
+  id: string;
+  name: string;
+  email: string;
+  created_at: Date | string | null;
+};

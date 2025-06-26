@@ -7,6 +7,10 @@ export const httpStatusMessage = {
     statusCode: 201,
     statusMessage: "Created",
   },
+  204: {
+    statusCode: 204,
+    statusMessage: "No Content",
+  },
   400: {
     statusCode: 400,
     statusMessage: "Bad Request",
