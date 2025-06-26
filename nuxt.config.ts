@@ -6,7 +6,6 @@ export default defineNuxtConfig({
     "@nuxthub/core",
     "@nuxt/ui",
     "nuxt-auth-utils",
-    "@nuxt/test-utils/module",
     "@pinia/nuxt",
     "@vueuse/nuxt",
     "nuxt-security",
