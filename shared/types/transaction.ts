@@ -25,7 +25,7 @@ export const TransactionCreateSchema = z.object({
     }),
   amount: z.coerce.number(),
   note: z.string().max(200).nullish(),
-  transactionAt: z.union([z.date(), z.iso.date(), z.iso.datetime()]),
+  transactionAt: zodDate,
   isVisibleInReport: z.boolean().default(true),
 });
 
