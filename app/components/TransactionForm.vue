@@ -203,10 +203,7 @@ async function onFileSelect(event: Event) {
         :disabled="isLoading"
         placeholder="Find category..."
       >
-        <template
-          v-if="selectedCategory"
-          #leading
-        >
+        <template v-if="selectedCategory">
           <UIcon
             :name="
               selectedCategory.is_expense
@@ -219,9 +216,6 @@ async function onFileSelect(event: Event) {
               'text-green-600': !selectedCategory.is_expense,
             }"
           />
-        </template>
-
-        <template v-if="selectedCategory">
           <div class="ml-0 flex flex-col space-y-0.5 px-1 text-start">
             <p class="font-medium">{{ selectedCategory.name }}</p>
             <p class="text-xs text-gray-500 dark:text-gray-400">
