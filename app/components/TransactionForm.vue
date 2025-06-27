@@ -1,4 +1,5 @@
 <script setup lang="ts">
+import { FetchError } from "ofetch";
 import type { FormSubmitEvent } from "#ui/types";
 
 import { format, formatISO } from "date-fns";
@@ -7,19 +8,13 @@ const emit = defineEmits<{
   close: [];
 }>();
 
-const { data: walletsData } = await useFetch("/api/wallets", {
-  deep: false,
-  lazy: true,
-  transform: (value) => {
-    return value.data;
-  },
-});
-const { data: categoriesData } = await useFetch("/api/categories", {
-  deep: false,
-  lazy: true,
-  transform: (value) => {
-    return value.data;
-  },
+const { data } = await useAsyncData("transactions-form-fetch", async () => {
+  const [wallets, categories] = await Promise.all([
+    $fetch("/api/wallets"),
+    $fetch("/api/categories"),
+  ]);
+
+  return { wallets, categories };
 });
 
 const toast = useToast();
@@ -67,13 +62,18 @@ async function onSubmit(event: FormSubmitEvent<TransactionCreate>) {
     await refreshNuxtData(DASHBOARD_INDEX_CACHE_KEYS);
 
     emit("close");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) {
-    toast.add({
-      title: "Failed",
-      description: "Error when creating transaction",
-      color: "error",
-    });
+  } catch (error) {
+    if (error instanceof FetchError) {
+      toast.add({
+        title: error.data?.message,
+        color: "error",
+      });
+    } else {
+      toast.add({
+        title: "Error: unknown",
+        color: "error",
+      });
+    }
   } finally {
     setLoading(false);
   }
@@ -88,23 +88,13 @@ async function uploadImage(transactionId: string | undefined) {
     return;
   }
 
-  try {
-    const formData = new FormData();
-    formData.append("image", statePhoto.value);
+  const formData = new FormData();
+  formData.append("image", statePhoto.value);
 
-    await $fetch(`/api/transactions/${transactionId}/image`, {
-      method: "POST",
-      body: formData,
-    });
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) {
-    toast.add({
-      title: "Failed",
-      description:
-        "Error when uploading photo file, but success when create transaction.",
-      color: "error",
-    });
-  }
+  await $fetch(`/api/transactions/${transactionId}/image`, {
+    method: "POST",
+    body: formData,
+  });
 }
 
 const selectedCategory = computed(() => {
@@ -112,7 +102,7 @@ const selectedCategory = computed(() => {
     return null;
   }
 
-  return categoriesData.value?.filter(
+  return data.value?.categories.data?.filter(
     (data) => data.id === state.categoryId,
   )[0];
 });
@@ -122,7 +112,9 @@ const selectedWallet = computed(() => {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.walletId)[0];
+  return data.value?.wallets.data?.filter(
+    (data) => data.id === state.walletId,
+  )[0];
 });
 
 async function onFileSelect(event: Event) {
@@ -152,7 +144,7 @@ async function onFileSelect(event: Event) {
         value-key="id"
         label-key="name"
         :icon="selectedWallet?.icon ?? undefined"
-        :items="walletsData"
+        :items="data?.wallets.data ?? []"
         required
         :disabled="isLoading"
         placeholder="Find wallet..."
@@ -198,7 +190,7 @@ async function onFileSelect(event: Event) {
         v-model="state.categoryId"
         value-key="id"
         label-key="name"
-        :items="categoriesData"
+        :items="data?.categories.data ?? []"
         required
         :disabled="isLoading"
         placeholder="Find category..."
