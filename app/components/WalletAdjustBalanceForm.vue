@@ -49,8 +49,8 @@ async function onSubmit(event: FormSubmitEvent<WalletAdjustBalanceCreate>) {
   setLoading(true);
 
   try {
-    await $fetch(`/api/wallets/${walletId}/adjust-balance`, {
-      method: "POST",
+    await $fetch(`/api/wallets/${walletId}`, {
+      method: "PATCH",
       body: event.data,
     });
 
