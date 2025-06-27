@@ -122,11 +122,7 @@ export async function getUserWallets(db: DrizzleDatabase, userId: string) {
       eq(tables.transactions.categoryId, tables.categories.id),
     )
     .where(
-      and(
-        eq(tables.wallets.userId, userId),
-        isNull(tables.wallets.deletedAt),
-        eq(tables.transactions.isVisibleInReport, true),
-      ),
+      and(eq(tables.wallets.userId, userId), isNull(tables.wallets.deletedAt)),
     )
     .groupBy(tables.wallets.id, tables.wallets.name, tables.wallets.createdAt)
     .orderBy(asc(tables.wallets.name));
