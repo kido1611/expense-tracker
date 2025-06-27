@@ -9,3 +9,7 @@
   --font-kalam: "Kalam", cursive;
   --font-noto-sans: "Noto Sans", sans-serif;
 }
+
+.stretched-link {
+  @apply after:absolute after:inset-0 after:content-[""];
+}
