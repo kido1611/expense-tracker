@@ -65,13 +65,7 @@ const dropdownItems = [
           side: 'bottom',
         }"
       >
-        <UButton
-          color="neutral"
-          variant="outline"
-          square
-          trailing-icon="i-tabler-dots-vertical"
-          size="md"
-        />
+        <DropdownTriggerButton />
       </UDropdownMenu>
     </div>
   </UCard>

@@ -1,4 +1,13 @@
 <script setup lang="ts">
+useHead({
+  meta: [
+    {
+      name: "robots",
+      content: "noindex,nofollow",
+    },
+  ],
+});
+
 const route = useRoute();
 
 const sidebarStore = useDashboardSidebarStore();
