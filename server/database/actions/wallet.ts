@@ -40,7 +40,10 @@ export async function getUserWalletById(
     .from(tables.wallets)
     .leftJoin(
       tables.transactions,
-      eq(tables.transactions.walletId, tables.wallets.id),
+      and(
+        eq(tables.transactions.walletId, tables.wallets.id),
+        eq(tables.transactions.isVisibleInReport, true),
+      ),
     )
     .leftJoin(
       tables.categories,
@@ -109,17 +112,55 @@ export async function getUserWallets(db: DrizzleDatabase, userId: string) {
     .from(tables.wallets)
     .leftJoin(
       tables.transactions,
-      eq(tables.transactions.walletId, tables.wallets.id),
+      and(
+        eq(tables.transactions.walletId, tables.wallets.id),
+        eq(tables.transactions.isVisibleInReport, true),
+      ),
     )
     .leftJoin(
       tables.categories,
       eq(tables.transactions.categoryId, tables.categories.id),
     )
     .where(
-      and(eq(tables.wallets.userId, userId), isNull(tables.wallets.deletedAt)),
+      and(
+        eq(tables.wallets.userId, userId),
+        isNull(tables.wallets.deletedAt),
+        eq(tables.transactions.isVisibleInReport, true),
+      ),
     )
     .groupBy(tables.wallets.id, tables.wallets.name, tables.wallets.createdAt)
     .orderBy(asc(tables.wallets.name));
 
   return wallets;
 }
+
+// export async function getTotalWalletBalance(
+//   db: DrizzleDatabase,
+//   userId: string,
+// ) {
+//   return await db
+//     .select({
+//       total: sql<number>`coalesce(sum(
+//           case
+//             when categories.is_expense = 1 then -transactions.amount
+//             when categories.is_expense = 0 then transactions.amount
+//             else 0
+//           end
+//         ), 0) as balance`,
+//     })
+//     .from(tables.wallets)
+//     .leftJoin(
+//       tables.transactions,
+//       and(
+//         eq(tables.transactions.walletId, tables.wallets.id),
+//         eq(tables.transactions.isVisibleInReport, true),
+//       ),
+//     )
+//     .leftJoin(
+//       tables.categories,
+//       eq(tables.transactions.categoryId, tables.categories.id),
+//     )
+//     .where(
+//       and(eq(tables.wallets.userId, userId), isNull(tables.wallets.deletedAt)),
+//     );
+// }

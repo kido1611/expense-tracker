@@ -1,6 +1,10 @@
-import { desc, eq, aliasedTable, inArray } from "drizzle-orm";
+import { desc, eq, aliasedTable, inArray, gte, lte } from "drizzle-orm";
 import { DrizzleDatabase } from "~~/server/utils/drizzle";
-import { TransactionUpdateType } from "~~/shared/types/transaction";
+import {
+  TransactionUpdateType,
+  StatisticBalanceOptions,
+  StatisticBalanceByTypeOptions,
+} from "~~/shared/types/transaction";
 
 export async function createUserTransaction(
   db: DrizzleDatabase,
@@ -163,4 +167,75 @@ export async function updateUserTransactionById(
     .returning();
 
   return transaction;
+}
+
+export async function getStatisticsTotalBalance(
+  db: DrizzleDatabase,
+  userId: string,
+  options: StatisticBalanceOptions = {},
+) {
+  return await db
+    .select({
+      total: sql<number>`coalesce(sum(
+          case 
+            when categories.is_expense = 1 then -transactions.amount
+            when categories.is_expense = 0 then transactions.amount
+            else 0
+          end
+        ), 0) as balance`,
+    })
+    .from(tables.transactions)
+    .innerJoin(
+      tables.categories,
+      eq(tables.transactions.categoryId, tables.categories.id),
+    )
+    .where(
+      and(
+        eq(tables.transactions.userId, userId),
+        eq(tables.transactions.isVisibleInReport, true),
+        options.startDate
+          ? gte(tables.transactions.transactionAt, options.startDate)
+          : undefined,
+        options.endDate
+          ? lte(tables.transactions.transactionAt, options.endDate)
+          : undefined,
+      ),
+    );
+}
+
+export async function getStatisticsTotalBalanceByType(
+  db: DrizzleDatabase,
+  userId: string,
+  options: StatisticBalanceByTypeOptions,
+) {
+  return await db
+    .select({
+      total: sql<number>`coalesce(sum(
+          case 
+            when categories.is_expense = 1 then -transactions.amount
+            when categories.is_expense = 0 then transactions.amount
+            else 0
+          end
+        ), 0) as balance`,
+    })
+    .from(tables.transactions)
+    .innerJoin(
+      tables.categories,
+      and(
+        eq(tables.transactions.categoryId, tables.categories.id),
+        eq(tables.categories.isExpense, options.isExpense),
+      ),
+    )
+    .where(
+      and(
+        eq(tables.transactions.userId, userId),
+        eq(tables.transactions.isVisibleInReport, true),
+        options.startDate
+          ? gte(tables.transactions.transactionAt, options.startDate)
+          : undefined,
+        options.endDate
+          ? lte(tables.transactions.transactionAt, options.endDate)
+          : undefined,
+      ),
+    );
 }

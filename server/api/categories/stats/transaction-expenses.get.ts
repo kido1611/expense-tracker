@@ -1,9 +1,7 @@
 export default defineEventHandler(
   async (event): Promise<ApiResponse<CategoryStatTransaction[]>> => {
-    const session = await requireUserSession(event);
-    const user = await ensureUserIsAvailable(event, session);
-
     const db = useDrizzle();
+    const user = await ensureUserIsAvailable(event, db);
 
     const res = await db
       .select({

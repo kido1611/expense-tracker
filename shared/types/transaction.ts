@@ -2,6 +2,14 @@ import { z } from "zod/v4";
 import type { WalletResponse } from "./wallet";
 import type { CategoryResponse } from "./category";
 
+const zodDate = z.union([
+  z.date(),
+  z.iso.date(),
+  z.iso.datetime({
+    offset: true,
+  }),
+]);
+
 export const TransactionCreateSchema = z.object({
   walletId: z
     .uuid({
@@ -54,3 +62,20 @@ export type TransactionResponse = {
 export const TransactionRouteParamSchema = z.object({
   id: z.uuid(),
 });
+
+const StatisticBalanceOptionsSchema = z.object({
+  startDate: z.nullish(z.date()),
+  endDate: z.nullish(z.date()),
+});
+export type StatisticBalanceOptions = z.output<
+  typeof StatisticBalanceOptionsSchema
+>;
+
+const StatisticBalanceByTypeOptionsSchema = z.object({
+  isExpense: z.boolean(),
+  startDate: z.nullish(z.date()),
+  endDate: z.nullish(z.date()),
+});
+export type StatisticBalanceByTypeOptions = z.output<
+  typeof StatisticBalanceByTypeOptionsSchema
+>;

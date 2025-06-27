@@ -1,18 +1,21 @@
 <script setup lang="ts">
-const { data, status } = await useFetch("/api/wallets/stats/total-balance", {
-  key: DASHBOARD_TOTAL_BALANCE_TILE_CACHE_KEY_NAME,
-  server: false,
-  lazy: true,
-  transform: (data) => {
-    return {
-      data: data.data ?? 0,
-      fetched_at: new Date(),
-    };
+const { data, status } = await useFetch(
+  "/api/transactions/stats/total-balance",
+  {
+    key: DASHBOARD_TOTAL_BALANCE_TILE_CACHE_KEY_NAME,
+    server: false,
+    lazy: true,
+    transform: (data) => {
+      return {
+        data: data.data ?? 0,
+        fetched_at: new Date(),
+      };
+    },
+    getCachedData(key, nuxtApp) {
+      return getFetchCache(key, nuxtApp);
+    },
   },
-  getCachedData(key, nuxtApp) {
-    return getFetchCache(key, nuxtApp);
-  },
-});
+);
 </script>
 
 <template>

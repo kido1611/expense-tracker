@@ -1,38 +1,24 @@
 import { startOfMonth, endOfMonth } from "date-fns";
+import { getStatisticsTotalBalanceByType } from "~~/server/database/actions";
 
 export default defineEventHandler(
   async (event): Promise<ApiResponse<number>> => {
-    const session = await requireUserSession(event);
-    const user = await ensureUserIsAvailable(event, session);
+    const db = useDrizzle();
+    const user = await ensureUserIsAvailable(event, db);
 
     const startMonth = startOfMonth(new Date());
     const endMonth = endOfMonth(new Date());
 
-    const db = useDrizzle();
-
-    const totalIncomes = await db
-      .select({
-        total: sql<number>`cast(sum(${tables.transactions.amount}) as int)`,
-      })
-      .from(tables.transactions)
-      .innerJoin(
-        tables.categories,
-        eq(tables.transactions.categoryId, tables.categories.id),
-      )
-      .where(
-        and(
-          eq(tables.transactions.userId, user.id),
-          eq(tables.categories.isExpense, false),
-          eq(tables.transactions.isVisibleInReport, true),
-          gte(tables.transactions.transactionAt, startMonth),
-          lt(tables.transactions.transactionAt, endMonth),
-        ),
-      );
+    const totalBalance = await getStatisticsTotalBalanceByType(db, user.id, {
+      isExpense: false,
+      startDate: startMonth,
+      endDate: endMonth,
+    });
 
     return {
       error: false,
       ...httpStatusMessage[200],
-      data: totalIncomes[0].total ?? 0,
+      data: totalBalance[0].total ?? 0,
     };
   },
 );
