@@ -5,15 +5,15 @@ const { data, status } = await useFetch(
     key: DASHBOARD_TOTAL_EXPENSE_TILE_THIS_MONTH_CACHE_KEY_NAME,
     server: false,
     lazy: true,
-    transform: (data) => {
-      return {
-        data: data.data ?? 0,
-        fetched_at: new Date(),
-      };
-    },
-    getCachedData(key, nuxtApp) {
-      return getFetchCache(key, nuxtApp);
-    },
+    // transform: (data) => {
+    //   return {
+    //     data: data.data ?? 0,
+    //     fetched_at: new Date(),
+    //   };
+    // },
+    // getCachedData(key, nuxtApp) {
+    //   return getFetchCache(key, nuxtApp);
+    // },
   },
 );
 </script>
@@ -23,6 +23,6 @@ const { data, status } = await useFetch(
     title="Total Expense (This Month)"
     icon="i-tabler-currency-dollar"
     :value="idrFormatter(data?.data ?? 0)"
-    :is-loading="status === 'pending'"
+    :is-loading="status === 'pending' && data === undefined"
   />
 </template>

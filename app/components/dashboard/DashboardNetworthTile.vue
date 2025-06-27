@@ -1,8 +1,8 @@
 <script setup lang="ts">
-const { data: dataExpense } = useNuxtData<{ data: number; fetch_at: Date }>(
+const { data: dataExpense } = useNuxtData<ApiResponse<number>>(
   DASHBOARD_TOTAL_EXPENSE_TILE_THIS_MONTH_CACHE_KEY_NAME,
 );
-const { data: dataIncome } = useNuxtData<{ data: number; fetch_at: Date }>(
+const { data: dataIncome } = useNuxtData<ApiResponse<number>>(
   DASHBOARD_TOTAL_INCOME_TILE_THIS_MONTH_CACHE_KEY_NAME,
 );
 

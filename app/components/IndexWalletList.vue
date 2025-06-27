@@ -9,19 +9,18 @@ const { open: openAdjustBalance } = walletAdjustBalanceStore;
 
 const { data, status } = await useFetch("/api/wallets", {
   key: INDEX_WALLETS_CACHE_KEY_NAME,
-  deep: false,
   server: false,
   lazy: true,
   dedupe: "cancel",
-  transform: (value) => {
-    return {
-      data: value.data,
-      fetched_at: new Date(),
-    };
-  },
-  getCachedData(key, nuxtApp) {
-    return getFetchCache(key, nuxtApp);
-  },
+  // transform: (value) => {
+  //   return {
+  //     data: value.data,
+  //     fetched_at: new Date(),
+  //   };
+  // },
+  // getCachedData(key, nuxtApp) {
+  //   return getFetchCache(key, nuxtApp);
+  // },
 });
 
 const isSkeletonVisible = computed(() => {
@@ -48,7 +47,7 @@ const isSkeletonVisible = computed(() => {
     </template>
 
     <template v-else>
-      <template v-if="data && (data.data?.length ?? 0) > 0">
+      <template v-if="data && data.data && data.data.length > 0">
         <div
           class="grid grid-cols-1 divide-y divide-neutral-700 overflow-hidden rounded-lg border border-neutral-700 bg-neutral-900"
         >
