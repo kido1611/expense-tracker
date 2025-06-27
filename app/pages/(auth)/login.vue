@@ -1,14 +1,19 @@
 <script setup lang="ts">
+import { FetchError } from "ofetch";
 import type { FormSubmitEvent } from "#ui/types";
 
 definePageMeta({
   middleware: "guest",
+  layout: "auth",
+});
+useHead({
+  title: "Login",
 });
 
 const { fetch: refreshSession } = useUserSession();
+const toast = useToast();
 
 const isShowPassword = ref<boolean>(false);
-const toast = useToast();
 const isLoading = ref<boolean>(false);
 
 const state = reactive({
@@ -17,43 +22,48 @@ const state = reactive({
 });
 
 async function onSubmit(event: FormSubmitEvent<UserLogin>) {
-  isLoading.value = true;
-
-  await $fetch("/api/auth/login", {
-    method: "POST",
-    body: event.data,
-  })
-    .then(async () => {
-      toast.add({
-        title: "Ok",
-      });
-
-      await refreshSession();
-      await navigateTo("/dashboard");
-    })
-    .catch(() => {
-      toast.add({
-        title: "Invalid credential",
-        color: "error",
-      });
+  try {
+    isLoading.value = true;
+    await $fetch("/api/auth/login", {
+      method: "POST",
+      body: event.data,
     });
 
-  isLoading.value = false;
+    await refreshSession();
+    await navigateTo("/dashboard");
+  } catch (error: any) {
+    if (error instanceof FetchError) {
+      toast.add({
+        title: error.data?.message,
+        color: "error",
+      });
+    } else {
+      toast.add({
+        title: "Error: unknown",
+        color: "error",
+      });
+    }
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 
 <template>
-  <UContainer>
-    <h1>Login</h1>
-    <NuxtLink to="/login">Login</NuxtLink>
-    <NuxtLink to="/register">Register</NuxtLink>
+  <div class="flex flex-col gap-y-8">
+    <h1 class="text-3xl font-light">Login</h1>
+
     <UForm
       :schema="UserLoginSchema"
       :state="state"
-      class="space-y-5 flex flex-col"
+      class="flex flex-col space-y-5"
       @submit="onSubmit"
     >
-      <UFormField label="Email" name="email" required>
+      <UFormField
+        label="Email"
+        name="email"
+        required
+      >
         <UInput
           v-model="state.email"
           type="email"
@@ -63,7 +73,11 @@ async function onSubmit(event: FormSubmitEvent<UserLogin>) {
         />
       </UFormField>
 
-      <UFormField label="Password" name="password" required>
+      <UFormField
+        label="Password"
+        name="password"
+        required
+      >
         <UInput
           v-model="state.password"
           :type="isShowPassword ? 'text' : 'password'"
@@ -87,9 +101,24 @@ async function onSubmit(event: FormSubmitEvent<UserLogin>) {
         </UInput>
       </UFormField>
 
-      <UButton type="submit" class="self-start" :loading="isLoading"
+      <UButton
+        type="submit"
+        class="self-start"
+        icon="i-tabler-login"
+        :loading="isLoading"
         >Login</UButton
       >
     </UForm>
-  </UContainer>
+
+    <p class="text-sm text-neutral-300">
+      Doesn't have an account?
+      <UButton
+        to="/register"
+        variant="ghost"
+        color="neutral"
+        aria-label="Click here to register"
+        >Click here!</UButton
+      >
+    </p>
+  </div>
 </template>

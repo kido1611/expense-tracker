@@ -1,13 +1,19 @@
 <script setup lang="ts">
+import { FetchError } from "ofetch";
 import type { FormSubmitEvent } from "@nuxt/ui";
+
 definePageMeta({
   middleware: "guest",
+  layout: "auth",
 });
+useHead({
+  title: "Register",
+});
+
+const toast = useToast();
 
 const isLoading = ref<boolean>(false);
 const isShowPassword = ref<boolean>(false);
-
-const toast = useToast();
 
 const state = reactive({
   name: "",
@@ -17,41 +23,47 @@ const state = reactive({
 });
 
 async function onSubmit(event: FormSubmitEvent<UserCreate>) {
-  isLoading.value = true;
+  try {
+    isLoading.value = true;
 
-  await $fetch("/api/auth/register", {
-    method: "POST",
-    body: event.data,
-  })
-    .then(async () => {
-      return navigateTo("/login");
-    })
-    .catch((err) => {
+    await $fetch("/api/auth/register", {
+      method: "POST",
+      body: event.data,
+    });
+
+    await navigateTo("/login");
+  } catch (error: any) {
+    if (error instanceof FetchError) {
       toast.add({
-        title: err.data.message,
+        title: error.data?.message,
         color: "error",
       });
-    })
-    .finally(() => {
-      isLoading.value = false;
-    });
+    } else {
+      toast.add({
+        title: "Error: unknown",
+        color: "error",
+      });
+    }
+  } finally {
+    isLoading.value = false;
+  }
 }
 </script>
 
 <template>
-  <UContainer>
-    <h1>Register</h1>
-
-    <NuxtLink to="/login">Login</NuxtLink>
-    <NuxtLink to="/register">Register</NuxtLink>
-
+  <div class="flex flex-col gap-y-8">
+    <h1 class="text-3xl font-light">Register</h1>
     <UForm
       :schema="UserCreateSchema"
       :state="state"
-      class="space-y-5 flex flex-col"
+      class="flex flex-col space-y-5"
       @submit="onSubmit"
     >
-      <UFormField label="Name" name="name" required>
+      <UFormField
+        label="Name"
+        name="name"
+        required
+      >
         <UInput
           v-model="state.name"
           type="text"
@@ -60,7 +72,11 @@ async function onSubmit(event: FormSubmitEvent<UserCreate>) {
           :disabled="isLoading"
         />
       </UFormField>
-      <UFormField label="Email" name="email" required>
+      <UFormField
+        label="Email"
+        name="email"
+        required
+      >
         <UInput
           v-model="state.email"
           type="email"
@@ -70,7 +86,11 @@ async function onSubmit(event: FormSubmitEvent<UserCreate>) {
         />
       </UFormField>
 
-      <UFormField label="Password" name="password" required>
+      <UFormField
+        label="Password"
+        name="password"
+        required
+      >
         <UInput
           v-model="state.password"
           :type="isShowPassword ? 'text' : 'password'"
@@ -93,7 +113,11 @@ async function onSubmit(event: FormSubmitEvent<UserCreate>) {
           </template>
         </UInput>
       </UFormField>
-      <UFormField label="Password (Ulang)" name="passwordConfirmation" required>
+      <UFormField
+        label="Password (repeat)"
+        name="passwordConfirmation"
+        required
+      >
         <UInput
           v-model="state.passwordConfirmation"
           :type="isShowPassword ? 'text' : 'password'"
@@ -115,9 +139,24 @@ async function onSubmit(event: FormSubmitEvent<UserCreate>) {
           </template>
         </UInput>
       </UFormField>
-      <UButton type="submit" class="self-start" :loading="isLoading"
+      <UButton
+        type="submit"
+        class="self-start"
+        icon="i-tabler-user-plus"
+        :loading="isLoading"
         >Register</UButton
       >
     </UForm>
-  </UContainer>
+
+    <p class="text-sm text-neutral-300">
+      Have an account?
+      <UButton
+        to="/login"
+        variant="ghost"
+        color="neutral"
+        aria-label="Click here to login"
+        >Click here!</UButton
+      >
+    </p>
+  </div>
 </template>
