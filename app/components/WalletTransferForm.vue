@@ -1,10 +1,10 @@
 <script setup lang="ts">
 import type { FormSubmitEvent } from "#ui/types";
-
-import { format } from "date-fns";
+import { FetchError } from "ofetch";
+import { format, formatISO } from "date-fns";
 
 const { selectedWalletId } = defineProps<{
-  selectedWalletId: string | null | undefined;
+  selectedWalletId?: string | null;
 }>();
 const emit = defineEmits<{
   close: [];
@@ -14,7 +14,6 @@ const { isLoading, setLoading } = useLoading();
 const toast = useToast();
 
 const { data: walletsData } = await useFetch("/api/wallets", {
-  deep: false,
   lazy: true,
   transform: (value) => {
     return value.data;
@@ -22,28 +21,32 @@ const { data: walletsData } = await useFetch("/api/wallets", {
 });
 
 const state = reactive({
-  fromWalletId: "",
-  toWalletId: "",
+  source_wallet_id: "",
+  destination_wallet_id: "",
   amount: 0,
   note: "",
-  transferAt: format(new Date(), "yyyy-MM-dd'T'HH:mm"),
-  withFee: false,
-  feeAmount: 0,
+  transfer_at: format(new Date(), "yyyy-MM-dd"),
+  with_fee: false,
+  fee_amount: 0,
 });
 
 const selectedFromWallet = computed(() => {
-  if (!state.fromWalletId) {
+  if (!state.source_wallet_id) {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.fromWalletId)[0];
+  return walletsData.value?.filter(
+    (data) => data.id === state.source_wallet_id,
+  )[0];
 });
 const selectedToWallet = computed(() => {
-  if (!state.toWalletId) {
+  if (!state.destination_wallet_id) {
     return null;
   }
 
-  return walletsData.value?.filter((data) => data.id === state.toWalletId)[0];
+  return walletsData.value?.filter(
+    (data) => data.id === state.destination_wallet_id,
+  )[0];
 });
 
 const fromWalletList = computed(() => {
@@ -55,33 +58,35 @@ const fromWalletList = computed(() => {
 });
 
 const toWalletsList = computed(() => {
-  if (!state.fromWalletId) {
+  if (!state.source_wallet_id) {
     return [];
   }
 
-  return fromWalletList.value.filter((data) => data.id !== state.fromWalletId);
+  return fromWalletList.value.filter(
+    (data) => data.id !== state.source_wallet_id,
+  );
 });
 
 watch(
-  () => state.withFee,
+  () => state.with_fee,
   (newValue) => {
     if (!newValue) {
-      state.feeAmount = 0;
+      state.fee_amount = 0;
     } else {
-      state.feeAmount = 2500;
+      state.fee_amount = 2500;
     }
   },
 );
 watch(
-  () => state.fromWalletId,
+  () => state.source_wallet_id,
   () => {
-    state.toWalletId = "";
+    state.destination_wallet_id = "";
   },
 );
 
 onMounted(() => {
   if (selectedWalletId) {
-    state.fromWalletId = selectedWalletId;
+    state.source_wallet_id = selectedWalletId;
   }
 });
 
@@ -89,29 +94,39 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
   try {
     setLoading(true);
 
+    const data = {
+      ...event.data,
+      transfer_at: formatISO(syncDateToDateTime(event.data.transfer_at)),
+    };
+
     await $fetch("/api/wallets/transfer", {
       method: "POST",
-      body: event.data,
+      body: data,
     });
-
-    state.fromWalletId = "";
-    state.toWalletId = "";
-    state.amount = 0;
-    state.note = "";
-    state.transferAt = format(new Date(), "yyyy-MM-dd't'HH:mm");
-    state.withFee = false;
-    state.feeAmount = 0;
 
     await refreshNuxtData(DASHBOARD_INDEX_CACHE_KEYS);
 
+    state.source_wallet_id = "";
+    state.destination_wallet_id = "";
+    state.amount = 0;
+    state.note = "";
+    state.transfer_at = format(new Date(), "yyyy-MM-dd");
+    state.with_fee = false;
+    state.fee_amount = 0;
+
     emit("close");
-    // eslint-disable-next-line @typescript-eslint/no-unused-vars
-  } catch (_) {
-    toast.add({
-      title: "Failed",
-      description: "Error when creating transfer wallet",
-      color: "error",
-    });
+  } catch (error) {
+    if (error instanceof FetchError) {
+      toast.add({
+        title: error.data?.message,
+        color: "error",
+      });
+    } else {
+      toast.add({
+        title: "Error: unknown",
+        color: "error",
+      });
+    }
   } finally {
     setLoading(false);
   }
@@ -127,11 +142,11 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
   >
     <UFormField
       label="From"
-      name="fromWalletId"
+      name="source_wallet_id"
       required
     >
       <USelectMenu
-        v-model="state.fromWalletId"
+        v-model="state.source_wallet_id"
         value-key="id"
         label-key="name"
         :icon="selectedFromWallet?.icon ?? undefined"
@@ -157,7 +172,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="text-primary size-5 flex-none"
+            class="size-5 flex-none text-primary"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
@@ -175,11 +190,11 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     </UFormField>
     <UFormField
       label="To"
-      name="toWalletId"
+      name="destination_wallet_id"
       required
     >
       <USelectMenu
-        v-model="state.toWalletId"
+        v-model="state.destination_wallet_id"
         value-key="id"
         label-key="name"
         :icon="selectedToWallet?.icon ?? undefined"
@@ -205,7 +220,7 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
         <template #item="{ item }">
           <UIcon
             :name="item.icon ?? 'i-tabler-wallet'"
-            class="text-primary size-5 flex-none"
+            class="size-5 flex-none text-primary"
           />
           <div class="flex flex-col space-y-0.5 px-1">
             <p class="font-medium">{{ item.name }}</p>
@@ -242,12 +257,12 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
     </UFormField>
     <UFormField
       label="Transfer at"
-      name="transferAt"
+      name="transfer_at"
       required
     >
       <UInput
-        v-model="state.transferAt"
-        type="datetime-local"
+        v-model="state.transfer_at"
+        type="date"
         required
         :disabled="isLoading"
       />
@@ -264,18 +279,18 @@ async function onSubmit(event: FormSubmitEvent<WalletTransferCreate>) {
       />
     </UFormField>
     <UCheckbox
-      v-model="state.withFee"
-      name="withFee"
+      v-model="state.with_fee"
+      name="with_fee"
       label="Transfer Fee"
     />
     <UFormField
-      v-if="state.withFee"
+      v-if="state.with_fee"
       label="Fee Amount"
-      name="feeAmount"
+      name="fee_amount"
       required
     >
       <UInputNumber
-        v-model="state.feeAmount"
+        v-model="state.fee_amount"
         required
         :min="0"
         :format-options="{

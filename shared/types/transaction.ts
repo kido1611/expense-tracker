@@ -2,7 +2,7 @@ import { z } from "zod/v4";
 import type { WalletResponse } from "./wallet";
 import type { CategoryResponse } from "./category";
 
-const zodDate = z.union([
+export const zodDate = z.union([
   z.date(),
   z.iso.date(),
   z.iso.datetime({
