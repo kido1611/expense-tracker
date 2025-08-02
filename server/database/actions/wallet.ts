@@ -42,7 +42,7 @@ export async function getUserWalletById(
       tables.transactions,
       and(
         eq(tables.transactions.walletId, tables.wallets.id),
-        eq(tables.transactions.isVisibleInReport, true),
+        // eq(tables.transactions.isVisibleInReport, true),
       ),
     )
     .leftJoin(
