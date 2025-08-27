@@ -1,7 +1,13 @@
+import { startOfMonth, endOfMonth } from "date-fns";
+import { desc, eq, gte, lte } from "drizzle-orm";
+
 export default defineEventHandler(
   async (event): Promise<ApiResponse<CategoryStatTransaction[]>> => {
     const db = useDrizzle();
     const user = await ensureUserIsAvailable(event, db);
+
+    const startMonth = startOfMonth(new Date());
+    const endMonth = endOfMonth(new Date());
 
     const res = await db
       .select({
@@ -18,6 +24,9 @@ export default defineEventHandler(
         and(
           eq(tables.transactions.categoryId, tables.categories.id),
           eq(tables.transactions.isVisibleInReport, true),
+
+          gte(tables.transactions.transactionAt, startMonth),
+          lte(tables.transactions.transactionAt, endMonth),
         ),
       )
       .where(
@@ -26,7 +35,7 @@ export default defineEventHandler(
           eq(tables.categories.isExpense, true),
         ),
       )
-      .orderBy(asc(sql`transactions_sum_amount`))
+      .orderBy(desc(sql`transactions_sum_amount`))
       .groupBy(tables.categories.id);
 
     return {
